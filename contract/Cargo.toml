@@ -1,0 +1,33 @@
+[package]
+name = "cto"
+description = "CTO: the NEAR testnet memecoin where anyone can take over"
+version = "1.0.0"
+edition = "2024"
+rust-version = "1.95"
+publish = false
+license = "MIT"
+repository = "https://github.com/cto-takeover/cto-memecoin"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[package.metadata.near.reproducible_build]
+image = "sourcescan/cargo-near:0.22.0-rust-1.99.1"
+image_digest = "sha256:c9655eaf7436b90c87ea8b25739f91063032c5c30ba24cfeafe72c142943b5bb"
+passed_env = []
+container_build_command = ["cargo", "near", "build", "non-reproducible-wasm", "--locked"]
+
+[dependencies]
+near-sdk = "5.30.1"
+near-contract-standards = "5.30.1"
+
+[dev-dependencies]
+near-sdk = { version = "5.30.1", features = ["unit-testing"] }
+near-sandbox = "0.4.0"
+near-api = "0.8"
+tokio = { version = "1.12.0", features = ["full"] }
+testresult = "0.4.1"
+
+[lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = ['cfg(near)']

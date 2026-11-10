@@ -100,8 +100,22 @@ The 24 lines are in `reference/announcement-lines.json` (code constant in `src/l
 
 ## Done when
 
-- [ ] M1: after a takeover, `ft_metadata().icon` decodes to the new face; `face_svg` matches it byte for byte
-- [ ] M2: story numbers hold exactly (1,000,000 → 1,400,000 / 1,150,000 / 250,000); every error message above appears in a test
-- [ ] M3: old key's `announce` fails with `AccessKeyNotFound`; the new key calling `ft_transfer` fails (`MethodNameMismatch`)
-- [ ] M4: 10.5 days idle on a 7 + 7 coin gives exactly 1,200,000 from P = 1,000,000; 30 days gives exactly the floor
-- [ ] M5: `view_access_key_list` on the deployed account shows zero full-access keys
+- [x] M1: after a takeover, `ft_metadata().icon` decodes to the new face; `face_svg` matches it byte for byte (unit `story_ani_then_budi`, sandbox step 5)
+- [x] M2: story numbers hold exactly (1,000,000 → 1,400,000 / 1,150,000 / 250,000); every error message above appears in a test (unit `err_*`, sandbox steps 5, 8, 10)
+- [x] M3: old key's `announce` fails with `AccessKeyNotFound`; the new key calling `ft_transfer` fails (`MethodNameMismatch`) (sandbox steps 6, 7)
+- [x] M4: 10.5 days idle on a 7 + 7 coin gives exactly 1,200,000 from P = 1,000,000; 30 days gives exactly the floor (unit `price::tests`, `decay_on_chain`; sandbox step 9)
+- [ ] M5: `view_access_key_list` on the deployed account shows zero full-access keys (sandbox: zero after deploy, only the voice key after takeovers; testnet check is spec 6)
+
+## Build notes (added Nov 10 while implementing)
+
+Additions the spec did not name. None changes a rule above.
+
+- **Extra error messages** (exact strings, in `contract/src/lib.rs` `errors`): `CTO: faucet already claimed by this account`, `CTO: the faucet is empty`, `CTO: attach at least 0.00125 NEAR to register storage`, `CTO: force unregister is not supported, tokens only burn in takeovers`, `CTO: invalid launch config`, `CTO: allocations exceed the total supply`.
+- **Supply only falls in takeovers.** `storage_unregister(force: true)` is refused (it would burn a balance). If NEP-141's `ft_resolve_transfer` would burn a refund (sender unregistered meanwhile), the amount goes back to the faucet pool instead.
+- **Old CEO who unregistered still gets paid**: `take_seat` re-registers them (the 0.25 NEAR attached covers the storage).
+- `claim_faucet` needs the 0.00125 NEAR only when the caller is not registered yet (for example ani and budi on the demo coin already are).
+- `new()` is `#[private]`: only the account itself can call it, in the deploy transaction.
+- `get_seat` also returns `vacant`, `floor`, `next_payout`, `next_burned` (what the current CEO would get and what would burn if someone took the seat now). `seconds_until_decay` is 0 when vacant or already decaying.
+- `get_history(from_index, limit)`: both optional; `from_index` counts back from the newest (0 = newest). `total_burned()` view added.
+- Events carry `data` as a one-element array, like NEP-141's. The faucet pool is minted to the coin account in the launch `ft_mint` event, and each claim is an `ft_transfer` from it, so indexers see balances that add up.
+- Sandbox tests use near-sandbox + near-api (what `cargo near new` ships today) instead of near-workspaces; same local node.
