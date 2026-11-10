@@ -1,0 +1,24 @@
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "name": "HANDLER_ERROR",
+    "cause": {
+      "info": {},
+      "name": "INVALID_TRANSACTION"
+    },
+    "code": -32000,
+    "message": "Server error",
+    "data": {
+      "TxExecutionError": {
+        "InvalidTxError": {
+          "InvalidAccessKeyError": {
+            "MethodNameMismatch": {
+              "method_name": "set_face"
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "spike"
+}

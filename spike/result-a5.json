@@ -1,0 +1,25 @@
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "name": "HANDLER_ERROR",
+    "cause": {
+      "info": {},
+      "name": "INVALID_TRANSACTION"
+    },
+    "code": -32000,
+    "message": "Server error",
+    "data": {
+      "TxExecutionError": {
+        "InvalidTxError": {
+          "InvalidAccessKeyError": {
+            "AccessKeyNotFound": {
+              "account_id": "cto-spike.testnet",
+              "public_key": "ed25519:2BvM591hupfoq39EpbcP2pcETYDqmNZZAtPs1bzxmjH1"
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "spike"
+}
