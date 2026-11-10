@@ -1,0 +1,64 @@
+# Spec 6: Deploy and demo run
+
+Deploy both coins on Fri Nov 13, delete their keys the same hour, seed the story, record the real video on Sat Nov 14. All commands use `near` (near-cli-rs) on testnet.
+
+**Agent:** write `scripts/deploy.md` (or a script that prints commands) with every command filled in, including the exact `new()` JSON args in base units, generated from `reference/constants.json`. **Human:** runs them; keys stay in their keychain.
+
+## Accounts
+
+| Account | Role | Keys after setup | Starting NEAR |
+| --- | --- | --- | --- |
+| `cto.testnet` | Main coin (7 + 7 day decay) | none, then one voice key per CEO | 10 (pays its own storage) |
+| `demo-cto.testnet` | Demo coin (2 + 3 minute decay) | none, then one voice key per CEO | 10 |
+| `ani-cto.testnet` | Demo account; relayer holds its key | 1 full-access (Vercel env only) | 20 |
+| `budi-cto.testnet` | Demo account; relayer holds its key | 1 full-access (Vercel env only) | 20 |
+| human's own account | deploys, then has no power over either coin | their usual keys | any |
+
+## Deploy, per coin
+
+1. Build once: `cargo near build reproducible-wasm` → `res/cto.wasm`; commit it; note its SHA-256.
+2. Create the coin account with a temporary full-access key (testnet faucet sponsor).
+3. Deploy and init in one transaction: `near contract deploy <coin> use-file res/cto.wasm with-init-call new json-args '<args>' prepaid-gas '100 Tgas' attached-deposit '0 NEAR' network-config testnet sign-with-keychain send`.
+4. Check `near contract call-function as-read-only <coin> get_config json-args {} network-config testnet now` matches the constants.
+5. Delete the temporary key: `near account delete-keys <coin> public-keys <key> network-config testnet sign-with-keychain send`.
+6. Confirm `near account list-keys <coin> network-config testnet now` is empty; run `npm run verify`.
+
+Init arguments (whole CTO shown; send base units = × 10^18):
+
+| Argument | `cto.testnet` | `demo-cto.testnet` |
+| --- | --- | --- |
+| `name` / `symbol` | CTO / CTO | CTO DEMO / CTOD |
+| `opening_price` | 1,000,000 | 1,000,000 |
+| `decay_delay_s` | 604,800 | 120 |
+| `decay_length_s` | 604,800 | 180 |
+| `faucet_amount` | 2,000,000 | 2,000,000 |
+| `allocations` | `[]` | ani-cto 200,000,000 · budi-cto 200,000,000 |
+
+## Seed the story (main coin)
+
+1. ani-cto and budi-cto each `claim_faucet` on `cto.testnet` (2,000,000 each).
+2. ani takes the vacant seat for 1,000,000 with face [5, 1, 0, 1] (batik / laser / grin / CEO tie, id 2,626).
+3. ani posts line 1: "The face is mine until someone pays 1,400,000 CTO."
+4. Stop. budi's takeover (face [1, 2, 3, 7], id 672) happens live on camera Saturday.
+
+The demo coin needs no seeding: the relayer plays ani and budi, and the price returns to the floor after 5 quiet minutes.
+
+## Record the real video (Sat Nov 14)
+
+Follow `docs/video-script.md` (59 s, 7 scenes, same timing as the concept video). Re-record scenes 2–6 from the deployed app at 1920 × 1080 with Playwright. Scene 5 must show NEAR's real `AccessKeyNotFound` text and a real explorer link. No "design preview" tag in the final cut.
+
+## Submission checklist (target 19:00 WIB Sat Nov 14; hard deadline 06:59 WIB Sun Nov 15)
+
+- [ ] Repo public, `res/cto.wasm` committed, CI green
+- [ ] README: one-line pitch, "do this, see that" steps, contract addresses, verify output, honest limits (testnet only, demo relayer, wallets may cache icons)
+- [ ] README names the team's other project, if one is submitted
+- [ ] Live app URL works in a private window with no wallet
+- [ ] 60-second video uploaded where the form asks
+- [ ] X post with #NEARHackathon, video attached
+- [ ] Submission form sent
+
+## Done when
+
+- [ ] M5: both coins show zero keys in `list-keys` before the first takeover
+- [ ] `npm run verify` live layer passes against both coins
+- [ ] Front page on the main coin shows ani as CEO with her announcement

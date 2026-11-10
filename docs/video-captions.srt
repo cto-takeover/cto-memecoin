@@ -1,0 +1,75 @@
+1
+00:00:00,800 --> 00:00:02,807
+Every memecoin says the community
+
+2
+00:00:02,807 --> 00:00:04,632
+runs it. But the logo, and the
+
+3
+00:00:04,632 --> 00:00:06,517
+voice, still belong to one dev.
+
+4
+00:00:07,920 --> 00:00:10,600
+CTO fixes that. The coin has one
+
+5
+00:00:10,600 --> 00:00:13,531
+CEO seat, and anyone can take it by
+
+6
+00:00:13,531 --> 00:00:15,792
+paying 1.4× the last price.
+
+7
+00:00:16,990 --> 00:00:19,344
+Budi builds a new face from 4,096
+
+8
+00:00:19,344 --> 00:00:21,555
+safe parts, and takes the seat.
+
+9
+00:00:23,450 --> 00:00:26,454
+Ani is fired, but paid: 1.15 million CTO.
+
+10
+00:00:26,454 --> 00:00:29,532
+The rest is burned forever, so every fight
+
+11
+00:00:29,532 --> 00:00:31,877
+for the seat shrinks the supply.
+
+12
+00:00:33,580 --> 00:00:36,092
+Now Ani tries to post as the coin. NEAR
+
+13
+00:00:36,092 --> 00:00:38,926
+rejects her. Her key was deleted in the same
+
+14
+00:00:38,926 --> 00:00:41,695
+transaction, so the protocol, not a server,
+
+15
+00:00:41,695 --> 00:00:43,756
+decides who speaks for the coin.
+
+16
+00:00:45,660 --> 00:00:48,209
+No admin keys. Every step has a receipt,
+
+17
+00:00:48,209 --> 00:00:50,375
+and one command checks every rule.
+
+18
+00:00:52,380 --> 00:00:54,473
+CTO. The memecoin where anyone
+
+19
+00:00:54,473 --> 00:00:56,497
+can take over. Built on NEAR.

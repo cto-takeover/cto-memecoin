@@ -1,0 +1,63 @@
+{
+  "backgrounds": [
+    "Highlighter",
+    "NEAR green",
+    "Sky",
+    "Bubblegum",
+    "Sunset",
+    "Batik kawung",
+    "Parang stripe",
+    "Lilac"
+  ],
+  "eyes": [
+    "Dots",
+    "Laser",
+    "Shades",
+    "Sleepy",
+    "Wide",
+    "Wink",
+    "Knocked out",
+    "Determined"
+  ],
+  "mouths": [
+    "Grin",
+    "Flat",
+    "Oh",
+    "Smirk",
+    "Tongue",
+    "Teeth",
+    "Frown",
+    "Cat"
+  ],
+  "extras": [
+    "None",
+    "CEO tie",
+    "Party hat",
+    "Top hat",
+    "Headband",
+    "Monocle",
+    "Sweat drop",
+    "Peci"
+  ],
+  "face_id": "bg*512 + eyes*64 + mouth*8 + extra + 1",
+  "launch_face": [
+    0,
+    0,
+    1,
+    0
+  ],
+  "story_faces": {
+    "ani": [
+      5,
+      1,
+      0,
+      1
+    ],
+    "budi": [
+      1,
+      2,
+      3,
+      7
+    ]
+  }
+}

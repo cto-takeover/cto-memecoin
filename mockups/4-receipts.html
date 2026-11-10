@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CTO mockup: Receipts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"><link href="https://fonts.googleapis.com/css2?family=Archivo+Black&amp;family=JetBrains+Mono:wght@500;700&amp;family=Luckiest+Guy&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFF6E0;color:#111111;font-family:'Space Grotesk',system-ui,sans-serif}
+a{color:#111111}a:hover{color:#D7141A}
+.hd{font-family:'Archivo Black',Impact,sans-serif;letter-spacing:-.01em;line-height:1.02;margin:0}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.card{background:#FFFFFF;border:3px solid #111111;box-shadow:4px 4px 0 #111111;padding:18px}
+.kick{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:0 0 8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 26px;background:#D7141A;color:#FFF6E0;border:3px solid #111111;box-shadow:4px 4px 0 #111111;font-family:'Archivo Black',sans-serif;font-size:20px;text-decoration:none;letter-spacing:.02em;cursor:pointer;transition:transform .08s,box-shadow .08s}
+.btn:hover{color:#FFF6E0;transform:translate(2px,2px);box-shadow:2px 2px 0 #111111}
+.btn:active{transform:translate(4px,4px);box-shadow:0 0 0 #111111}
+.btn:disabled{opacity:.6;cursor:wait}
+.ghost{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;background:#FFFFFF;border:3px solid #111111;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;text-decoration:none;color:#111111;cursor:pointer;box-shadow:3px 3px 0 #111111}
+.ghost:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 #111111}
+.stamp{display:inline-block;font-family:'Luckiest Guy',cursive;font-size:28px;letter-spacing:.04em;padding:6px 14px 2px;border:4px solid currentColor;transform:rotate(-8deg);background:#FFF6E0;line-height:1.1}
+.sticker{display:inline-block;background:#FFD60A;border:3px solid #111111;box-shadow:3px 3px 0 #111111;padding:8px 14px;transform:rotate(-3deg)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:2px solid #111111;background:#FFFFFF;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;text-decoration:none;color:#111111}
+.ok{background:#00EC97}
+.muted{color:#5C5346}
+.rcpt{background:#FFFFFF;border-left:3px solid #111111;border-right:3px solid #111111;padding:14px 18px;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:15px;position:relative}
+.rcpt:before,.rcpt:after{content:'';position:absolute;left:-3px;right:-3px;height:3px;background:repeating-linear-gradient(90deg,#111111 0 10px,transparent 10px 16px)}
+.rcpt:before{top:0}.rcpt:after{bottom:0}
+.rrow{display:flex;justify-content:space-between;gap:12px;padding:5px 0}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:24px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:20px}
+.navp{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:2px solid #111111;font-weight:700;text-decoration:none;font-size:14px;background:#FFFFFF}
+.navp.on{background:#111111;color:#FFF6E0}
+.sw{display:flex;align-items:center;justify-content:center;background:#FFFFFF;border:2px solid #111111;padding:4px;min-height:44px;cursor:pointer;transition:transform .1s}
+.sw:hover{transform:translateY(-3px) rotate(-2deg)}
+.sw.sel{border:4px solid #111111;box-shadow:3px 3px 0 #111111;background:#FFD60A}
+.tab{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:3px solid #111111;font-family:'Archivo Black',sans-serif;font-size:14px;background:#FFFFFF;color:#111111;cursor:pointer}
+.tab.on{background:#111111;color:#FFF6E0}
+.halftone{background-image:radial-gradient(#E9D9B0 1.4px,transparent 1.6px);background-size:12px 12px}
+.ticker{overflow:hidden;background:#111111;color:#FFF6E0;border-bottom:3px solid #111111}
+.ticker-track{display:inline-flex;gap:56px;white-space:nowrap;padding:8px 0;animation:ticker 32s linear infinite}
+.ticker:hover .ticker-track{animation-play-state:paused}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#00EC97;margin-right:6px;animation:livedot 1.2s ease-in-out infinite}
+.a-bob{animation:bob 4.5s ease-in-out infinite}
+.a-thunk{animation:thunk .45s cubic-bezier(.2,1.6,.4,1) both}
+.a-wiggle{animation:wiggle 4s ease-in-out infinite}
+.a-flame{display:inline-block;animation:flicker .6s ease-in-out infinite;transform-origin:50% 90%}
+.a-rise{animation:rise .5s ease-out both}
+.a-out{animation:outL .5s ease-in forwards}
+.a-drop{animation:drop .6s cubic-bezier(.3,1.4,.5,1) both}
+.a-shake{animation:shake .45s ease-in-out both}
+.a-shuffle{animation:shuffle .18s linear infinite}
+.a-toast{animation:toast .4s cubic-bezier(.2,1.4,.4,1) both}
+.a-pulse{animation:pulse 1.6s ease-in-out infinite}
+.a-fill{animation:fill 1s ease-out both}
+.a-draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.4s ease-out forwards}
+.cursor{display:inline-block;width:9px;height:1.1em;background:currentColor;vertical-align:-3px;animation:blink 1s steps(1) infinite}
+.struck{position:relative}
+.struck:after{content:'';position:absolute;left:0;top:52%;height:3px;background:#D7141A;animation:strike .5s ease-out forwards;width:0}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes livedot{50%{opacity:.25}}
+@keyframes bob{0%,100%{transform:rotate(-1.5deg) translateY(0)}50%{transform:rotate(-.5deg) translateY(-8px)}}
+@keyframes thunk{0%{transform:rotate(-8deg) scale(2);opacity:0}60%{transform:rotate(-8deg) scale(.9);opacity:1}100%{transform:rotate(-8deg) scale(1);opacity:1}}
+@keyframes wiggle{0%,82%,100%{transform:rotate(0)}85%{transform:rotate(-3deg)}88%{transform:rotate(3deg)}91%{transform:rotate(-2deg)}94%{transform:rotate(1deg)}}
+@keyframes flicker{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.15) rotate(3deg)}}
+@keyframes rise{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
+@keyframes outL{to{transform:translateX(-160%) rotate(-14deg);opacity:0}}
+@keyframes drop{0%{transform:translateY(-140%) rotate(6deg);opacity:0}70%{transform:translateY(5%) scaleY(.94);opacity:1}100%{transform:none;opacity:1}}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(5px)}30%,50%,70%{transform:translateX(-9px)}40%,60%{transform:translateX(9px)}}
+@keyframes shuffle{0%{transform:rotate(-3deg) translateX(-5px)}50%{transform:rotate(3deg) translateX(5px)}100%{transform:rotate(-3deg) translateX(-5px)}}
+@keyframes toast{from{transform:translateY(30px) scale(.9);opacity:0}to{transform:none;opacity:1}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes blink{50%{opacity:0}}
+@keyframes strike{to{width:100%}}
+@media (prefers-reduced-motion: reduce){*,*:before,*:after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition:none !important}.ticker-track{animation:none !important}}
+</style>
+</head>
+<body>
+<div style="width:100%;min-height:100%;box-sizing:border-box;background:#FFF6E0;font-family:'Space Grotesk',system-ui,sans-serif;color:#111111">
+<header style="border-bottom:4px solid #111111;background:#FFF6E0">
+<div style="max-width:1160px;margin:0 auto;padding:18px 24px 12px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+<div><p class="mono" style="margin:0 0 4px;font-size:11px;letter-spacing:.1em">VOL. 1 · NO. 2 · TESTNET EDITION · MON 9 NOV 2026</p><p class="hd" style="font-size:46px">THE CTO TIMES</p><p class="mono" style="margin:6px 0 0;font-size:12px">There can only be one CEO · contract cto.testnet · owner keys: 0</p></div>
+<nav aria-label="Sections" style="display:flex;flex-wrap:wrap;gap:8px"><a class="navp" href="1-front-page.html">Front page</a><a class="navp" href="2-takeover-desk.html">Takeover desk</a><a class="navp" href="3-press-office.html">Press office</a><a class="navp on" href="4-receipts.html">Receipts</a></nav>
+</div>
+<div class="ticker mono" style="font-size:13px" aria-label="Live news ticker"><div class="ticker-track"><span><span class="dot"></span>LIVE</span><span>★ BREAKING: ani.testnet takes the vacant seat</span><span>★ 1,000,000 CTO burned on day one</span><span>★ Seat price now 1,400,000 CTO</span><span>★ ani: "the face is mine until someone pays 1.4x"</span><span>★ No admin keys. Rules are final.</span><span>★ Fired CEOs get paid 1.15x</span><span>★ Testnet only · no sale</span><span><span class="dot"></span>LIVE</span><span>★ BREAKING: ani.testnet takes the vacant seat</span><span>★ 1,000,000 CTO burned on day one</span><span>★ Seat price now 1,400,000 CTO</span><span>★ ani: "the face is mine until someone pays 1.4x"</span><span>★ No admin keys. Rules are final.</span><span>★ Fired CEOs get paid 1.15x</span><span>★ Testnet only · no sale</span></div></div>
+</header>
+<main style="max-width:1160px;margin:0 auto;padding:28px 24px 44px;display:grid;gap:30px">
+<section style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:16px"><div><p class="kick">Receipts · the calm page</p><p class="hd" style="font-size:56px">RECEIPTS</p><p style="margin:8px 0 0;font-size:18px">Every claim on the front page, with its transaction. No stickers on numbers here.</p></div><span class="stamp a-thunk" style="color:#111111;background:#00EC97;border-color:#111111;animation-delay:1.6s">VERIFIED</span></section>
+<section class="g2">
+<div class="card" style="box-shadow:none"><p class="kick">The demo, step by step</p><div class="a-rise" style="display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:2px solid #E8DFC8;animation-delay:0.00s"><span class="mono a-thunk" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:2px solid #111111;background:#00EC97;color:#111111;font-weight:700;transform:none;animation-delay:0.20s">✓</span><span>1. Deploy, full-access keys deleted</span><a class="chip" href="#">2Pa…9Lk ↗</a></div><div class="a-rise" style="display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:2px solid #E8DFC8;animation-delay:0.15s"><span class="mono a-thunk" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:2px solid #111111;background:#00EC97;color:#111111;font-weight:700;transform:none;animation-delay:0.35s">✓</span><span>2. ani takes the vacant seat · 1,000,000 burned</span><a class="chip" href="#">8hD…k1A ↗</a></div><div class="a-rise" style="display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:2px solid #E8DFC8;animation-delay:0.30s"><span class="mono a-thunk" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:2px solid #111111;background:#00EC97;color:#111111;font-weight:700;transform:none;animation-delay:0.50s">✓</span><span>3. ani posts as the coin</span><a class="chip" href="#">8xK…f3Q ↗</a></div><div class="a-rise" style="display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:2px solid #E8DFC8;animation-delay:0.45s"><span class="mono a-thunk" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:2px solid #111111;background:#00EC97;color:#111111;font-weight:700;transform:none;animation-delay:0.65s">✓</span><span>4. budi takes over · ani paid 1,150,000</span><a class="chip" href="#">4Tn…w8E ↗</a></div><div class="a-rise" style="display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:2px solid #E8DFC8;animation-delay:0.60s"><span class="mono a-thunk" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:2px solid #111111;background:#00EC97;color:#111111;font-weight:700;transform:none;animation-delay:0.80s">✓</span><span>5. 250,000 CTO burned · ft_burn event</span><a class="chip" href="#">4Tn…w8E ↗</a></div><div class="a-rise" style="display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:2px solid #E8DFC8;animation-delay:0.75s"><span class="mono a-thunk" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:2px solid #111111;background:#00EC97;color:#111111;font-weight:700;transform:none;animation-delay:0.95s">✓</span><span>6. ani key deleted, budi key added</span><a class="chip" href="#">4Tn…w8E ↗</a></div><div class="a-rise" style="display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:2px solid #E8DFC8;animation-delay:0.90s"><span class="mono a-thunk" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:2px solid #111111;background:#FFFFFF;color:#D7141A;font-weight:700;transform:none;animation-delay:1.10s">✗</span><span>7. ani post rejected: AccessKeyNotFound</span><span class="chip">expected failure</span></div></div>
+<div style="display:grid;gap:20px;align-content:start">
+<div style="background:#111111;border:3px solid #111111;padding:18px;min-height:300px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px"><span class="mono" style="color:#FFF6E0;font-size:13px">$ npm run verify</span><button type="button" class="chip" style="background:#FFF6E0;cursor:pointer">↺ Run again</button></div>
+<div class="mono" style="color:#00EC97;font-size:14px;line-height:1.7"><div class="a-rise" style="animation-duration:.2s">PASS  face changes in ft_metadata</div><div class="a-rise" style="animation-duration:.2s">PASS  old CEO paid exactly 1.15x</div><div class="a-rise" style="animation-duration:.2s">PASS  supply falls exactly 0.25x</div><div class="a-rise" style="animation-duration:.2s">PASS  old key rejected on chain</div><div class="a-rise" style="animation-duration:.2s">PASS  new key can only call announce</div><div class="a-rise" style="animation-duration:.2s">PASS  price decays after 7 idle days</div><div class="a-rise" style="animation-duration:.2s">PASS  floor holds at opening price</div><div class="a-rise" style="animation-duration:.2s">PASS  full-access keys on cto.testnet: 0</div><div class="a-rise" style="animation-duration:.2s">8 passed · no keys needed</div><span class="cursor"></span></div></div>
+<div class="card" style="box-shadow:none"><p class="kick">No owner keys</p>
+<div class="mono" style="font-size:14px;display:grid;gap:2px"><div class="rrow"><span>full-access keys</span><b>0</b></div><div class="rrow"><span>takeover multiplier</span><b>1.4x</b></div><div class="rrow"><span>old CEO payout</span><b>1.15x</b></div><div class="rrow"><span>burn</span><b>0.25x</b></div><div class="rrow"><span>decay</span><b>7 idle days, then 7 days down</b></div><div class="rrow"><span>code hash</span><b>Fk3…a9Q</b></div></div>
+<p class="muted" style="margin:10px 0 0;font-size:13px">Read live from the contract with view calls.</p></div>
+</div>
+</section>
+<section class="card" style="box-shadow:none">
+<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:end;margin-bottom:14px"><div><p class="hd" style="font-size:28px">SUPPLY OVER 60 DAYS</p><p class="muted" style="margin:4px 0 0">The mechanic, not a price prediction. Scripted scenarios from the launch rules. <b style="color:#111111">Black: supply.</b> <b style="color:#D7141A">Red: seat price.</b> Dots: takeovers.</p></div>
+<div role="tablist" aria-label="Scenario" style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" role="tab" class="tab on" aria-selected="true">BUSY</button><button type="button" role="tab" class="tab " aria-selected="false">QUIET</button><button type="button" role="tab" class="tab " aria-selected="false">ABANDONED</button></div></div>
+<div><svg viewBox="0 0 720 290" role="img" aria-label="busy scenario: supply falls at each takeover; seat price rises then decays when idle" style="width:100%;height:auto;display:block;background:#FFFFFF;border:2px solid #111111">
+<line x1="60" y1="250" x2="660" y2="250" stroke="#111111" stroke-width="2"></line><line x1="60" y1="24" x2="60" y2="250" stroke="#111111" stroke-width="2"></line><line x1="660" y1="24" x2="660" y2="250" stroke="#D7141A" stroke-width="2"></line>
+<text x="54" y="34" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#111111">1,000M</text><text x="54" y="252" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#111111">958.2M</text>
+<text x="666" y="34" font-family="JetBrains Mono" font-size="11" fill="#D7141A">49.2M</text><text x="666" y="252" font-family="JetBrains Mono" font-size="11" fill="#D7141A">0</text>
+<polyline class="a-draw" pathLength="1" points="60,245.5 70,243.7 80,243.7 90,241.2 100,241.2 110,237.7 120,237.7 130,237.7 140,232.8 150,232.8 160,232.8 170,225.9 180,225.9 190,225.9 200,216.3 210,216.3 220,216.3 230,216.3 240,202.9 250,202.9 260,202.9 270,202.9 280,184.0 290,184.0 300,184.0 310,184.0 320,184.0 330,157.6 340,157.6 350,157.6 360,157.6 370,157.6 380,157.6 390,120.6 400,120.6 410,120.6 420,120.6 430,120.6 440,120.6 450,120.6 460,68.9 470,68.9 480,68.9 490,68.9 500,68.9 510,68.9 520,68.9 530,68.9 540,31.8 550,31.8 560,31.8 570,31.8 580,31.8 590,31.8 600,31.8 610,31.8 620,62.3 630,30.0 640,30.0 650,30.0 660,30.0" fill="none" stroke="#D7141A" stroke-width="3" stroke-linejoin="round"></polyline>
+<polyline class="a-draw" pathLength="1" points="60,30.0 70,35.3 80,35.3 90,36.6 100,36.6 110,38.4 120,38.4 130,38.4 140,41.0 150,41.0 160,41.0 170,44.6 180,44.6 190,44.6 200,49.7 210,49.7 220,49.7 230,49.7 240,56.8 250,56.8 260,56.8 270,56.8 280,66.7 290,66.7 300,66.7 310,66.7 320,66.7 330,80.5 340,80.5 350,80.5 360,80.5 370,80.5 380,80.5 390,100.0 400,100.0 410,100.0 420,100.0 430,100.0 440,100.0 450,100.0 460,127.2 470,127.2 480,127.2 490,127.2 500,127.2 510,127.2 520,127.2 530,127.2 540,159.9 550,159.9 560,159.9 570,159.9 580,159.9 590,159.9 600,159.9 610,159.9 620,159.9 630,193.0 640,193.0 650,193.0 660,193.0" fill="none" stroke="#111111" stroke-width="4" stroke-linejoin="round"></polyline>
+<circle cx="70" cy="35.3" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle><circle cx="90" cy="36.6" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle><circle cx="110" cy="38.4" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle><circle cx="140" cy="41.0" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle><circle cx="170" cy="44.6" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle><circle cx="200" cy="49.7" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle><circle cx="240" cy="56.8" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle><circle cx="280" cy="66.7" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle><circle cx="330" cy="80.5" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle><circle cx="390" cy="100.0" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle><circle cx="460" cy="127.2" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle><circle cx="540" cy="159.9" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle><circle cx="630" cy="193.0" r="4" fill="#D7141A" stroke="#111111" stroke-width="1.5"></circle>
+<text x="64" y="272" font-family="JetBrains Mono" font-size="12" fill="#5C5346">day 0</text><text x="612" y="272" font-family="JetBrains Mono" font-size="12" fill="#5C5346">day 60</text>
+</svg>
+<div class="g3 mono" style="margin-top:12px;font-size:14px"><div><span class="muted">takeovers</span><br/><b>13</b></div><div><span class="muted">burned</span><br/><b>30,952,085 CTO</b></div><div><span class="muted">supply on day 60</span><br/><b>969,047,915</b></div></div></div>
+</section>
+</main>
+<footer class="mono" style="border-top:4px solid #111111;padding:14px 24px;font-size:12px;text-align:center">Testnet only · no sale · no admin keys · open source · CTO is a hackathon testnet experiment, not an investment.</footer>
+</div>
+</body>
+</html>

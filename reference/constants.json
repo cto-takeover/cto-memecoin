@@ -1,0 +1,68 @@
+{
+  "_note": "Single source of truth for every number. Amounts are whole CTO as strings; on chain multiply by 10^18.",
+  "decimals": 18,
+  "total_supply": "1000000000",
+  "opening_price": "1000000",
+  "takeover_ratio": {
+    "num": 7,
+    "den": 5
+  },
+  "payout_ratio_of_payment": {
+    "num": 23,
+    "den": 28
+  },
+  "voice_key_allowance_near": "0.25",
+  "take_seat_attached_near": "0.25",
+  "faucet_amount": "2000000",
+  "storage_deposit_near": "0.00125",
+  "announcements_kept": 50,
+  "announcement_lines": 24,
+  "history_page_max": 50,
+  "face_parts": {
+    "bg": 8,
+    "eyes": 8,
+    "mouth": 8,
+    "extra": 8
+  },
+  "coins": {
+    "main": {
+      "account": "cto.testnet",
+      "name": "CTO",
+      "symbol": "CTO",
+      "decay_delay_s": 604800,
+      "decay_length_s": 604800,
+      "allocations": {}
+    },
+    "demo": {
+      "account": "demo-cto.testnet",
+      "name": "CTO DEMO",
+      "symbol": "CTOD",
+      "decay_delay_s": 120,
+      "decay_length_s": 180,
+      "allocations": {
+        "ani-cto.testnet": "200000000",
+        "budi-cto.testnet": "200000000"
+      }
+    }
+  },
+  "demo_accounts": {
+    "ani": "ani-cto.testnet",
+    "budi": "budi-cto.testnet"
+  },
+  "spike_account": "cto-spike.testnet",
+  "network": "testnet",
+  "rpc": "https://rpc.testnet.near.org",
+  "explorer_tx": "https://testnet.nearblocks.io/txns/{hash}",
+  "explorer_account": "https://testnet.nearblocks.io/address/{account}",
+  "story_numbers": {
+    "ani_pays_vacant": "1000000",
+    "budi_pays": "1400000",
+    "ani_payout": "1150000",
+    "burned_on_takeover": "250000",
+    "next_price_after_budi": "1960000"
+  },
+  "deadline": {
+    "target": "2026-11-14T19:00:00+07:00",
+    "hard": "2026-11-15T06:59:00+07:00"
+  }
+}
