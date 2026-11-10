@@ -41,6 +41,16 @@ Supply in ink on the left axis, seat price in red on the right axis, a dot per t
 
 ## Done when
 
-- [ ] M9: four CSVs in `web/public/sim/`, and `--check` passes
+- [x] M9: four CSVs in `web/public/sim/`, and `--check` passes (Nov 10: `sim check: ok`; busy 13 takeovers, burned 30,952,085, supply 969,047,915)
 - [ ] The Receipts chart reads the CSVs, no hard-coded points
 - [ ] The README shows the busy chart as an image with the same numbers
+
+## Build notes (added Nov 10 while implementing)
+
+- **Timing model.** Launch at second 0 with the seat vacant. A takeover on day `d` happens at second `d × 86400`. Each row is the state at the last second of its day, so `ceo_days` is 0 on a takeover row, and abandoned shows `at_floor` on day 22 (day 21 is 1,000,002).
+- **Events.** One per row, in priority `takeover` > `at_floor` > `decay_started`. `at_floor` only fires for a held seat (a vacant seat always costs the floor).
+- **Whole-CTO rounding.** `supply` rounds down and `burned_total = 1,000,000,000 − supply`, so the two columns add up exactly on every row. The exact base-unit identity and each burn are checked separately, before rounding.
+- **Random.** splitmix64 seeded with 42 (no extra crate). Every hour from 01:00 on day 0 to the end of day 60, a 200-in-10,000 roll, taken only if the price at that hour is under 50,000,000. Seed 42 gives 18 takeovers, burned 52,315,320.
+- **Numbers** (rules, total supply, floor) load from `reference/constants.json` at build time; `--check` also fails if its ratios differ from the constants in `price.rs`.
+- **`--check`** runs all four scenarios, checks the invariants above at every row and every takeover (and the idle window hour by hour), checks busy within 0.1% of the table and quiet/abandoned within 5,000 CTO, and fails if a committed CSV in `web/public/sim/` is missing or differs from a fresh run. Extra flag: `--out-dir DIR` writes all four.
+- Results on Nov 10: busy 13 / 30,952,085 burned; quiet 4 / 1,664,286; abandoned 3 / 1,600,000; random 18 / 52,315,320.
