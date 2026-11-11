@@ -113,17 +113,17 @@ npm run verify:live       # full-access keys 0 on both, code hash, config, suppl
 
 ## 4. Vercel (demo relayer + app)
 
-1. Vercel → Add New Project → import \`cto-takeover/cto-memecoin\`. Root Directory \`web\` (keep "Include files outside the root directory" on: the build reads \`res/cto.wasm\`). Framework: Vite.
-2. Environment variables (Production), values printed by:
+Done on Wed Nov 11 from the CLI: project \`cto-memecoin\` (root directory \`web\`, Node 26), production secrets \`ANI_FULL_KEY\`, \`BUDI_FULL_KEY\` and \`VOICE_SECRET\` added straight from the key files, live at https://cto-memecoin.vercel.app. \`.vercelignore\` uploads only what the build reads. **Never change \`VOICE_SECRET\`**: the demo coin's voice keys are derived from it.
+
+After step 3, check the app picks up the deployed coins (a fresh deploy is only needed if the repo changed):
 
 \`\`\`bash
-echo "ANI_FULL_KEY=$(jq -r .private_key ~/.near-credentials/testnet/${ani}.json)"
-echo "BUDI_FULL_KEY=$(jq -r .private_key ~/.near-credentials/testnet/${budi}.json)"
-echo "VOICE_SECRET=$(openssl rand -hex 32)"
+npx vercel@65.14.0 env ls                 # the three secrets, Production
+npx vercel@65.14.0 deploy --prod          # from the repo root
+curl -s https://cto-memecoin.vercel.app/api/demo/state | head -c 300   # ani and budi balances, the seat
 \`\`\`
 
-   Paste them straight into Vercel; do not save them in a file in the repo. Set \`APP_ORIGINS\` only if the app is also served from another domain.
-3. Deploy, then open the app in a private window: the demo coin's Front page shows SEAT OPEN; Receipts shows full-access keys 0.
+Open the app in a private window: the demo coin's Front page shows SEAT OPEN; Receipts shows full-access keys 0.
 
 ## 5. Seed the story on the main coin
 
@@ -161,11 +161,11 @@ Expected: the announcement reads "The face is mine until someone pays ${commas(C
 
 \`\`\`bash
 npm run verify -- --out web/public/verify.txt --readme   # 12 PASS; also updates README.md
-# Put the app URL in README.md between <!-- app-url --> and <!-- /app-url -->
-git add web/public/verify.txt README.md && git commit -m "Verify output after deploy" && git push   # Vercel redeploys; Receipts shows it
+git add web/public/verify.txt README.md && git commit -m "Verify output after deploy" && git push
+npx vercel@65.14.0 deploy --prod   # Receipts shows the new verify.txt (skip if Vercel is connected to GitHub)
 
-E2E_BASE_URL=https://<your-app>.vercel.app npm run test:e2e
-gh workflow run ci.yml -f e2e_base_url=https://<your-app>.vercel.app   # CI's testnet e2e run
+E2E_BASE_URL=https://cto-memecoin.vercel.app npm run test:e2e
+gh workflow run ci.yml -f e2e_base_url=https://cto-memecoin.vercel.app   # CI's testnet e2e run
 \`\`\`
 
 ## Video (Sat Nov 14): film on the demo coin

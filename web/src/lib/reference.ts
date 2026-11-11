@@ -52,7 +52,7 @@ export const constants = {
   },
   "spike_account": "cto-spike.testnet",
   "network": "testnet",
-  "rpc": "https://rpc.testnet.near.org",
+  "rpc": "https://rpc.testnet.fastnear.com",
   "explorer_tx": "https://testnet.nearblocks.io/txns/{hash}",
   "explorer_account": "https://testnet.nearblocks.io/address/{account}",
   "story_numbers": {

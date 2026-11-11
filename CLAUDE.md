@@ -91,7 +91,7 @@ Ask the human, with exact commands ready to paste, when you reach these:
 ## Tooling notes
 
 - Contract: `cargo near build` (use `reproducible-wasm` for the final build; needs Docker; fall back to `non-reproducible-wasm` if Docker is unavailable and say so in the README).
-- NEAR CLI: `near` from near-cli-rs; testnet RPC `https://rpc.testnet.near.org`; explorer `https://testnet.nearblocks.io`.
+- NEAR CLI: `near` from near-cli-rs; testnet RPC `https://rpc.testnet.fastnear.com` (from `constants.json`; `rpc.testnet.near.org` is deprecated and answers browsers with HTTP 429 after ~20 calls); explorer `https://testnet.nearblocks.io`.
 - Fonts: Google Fonts (Archivo Black, Space Grotesk, JetBrains Mono, Luckiest Guy).
 - Verify APIs you're unsure of (near-sdk 5.x key actions such as `add_access_key_allowance`, `env::signer_account_pk`, near-workspaces time travel) against the installed crate versions instead of guessing.
 

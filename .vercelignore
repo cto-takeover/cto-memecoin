@@ -1,0 +1,11 @@
+# Upload only what the web build reads (Vercel root directory: web)
+/*
+!/web
+!/reference
+!/res
+!/verify
+!/scripts
+/web/node_modules
+/web/dist
+/web/.env*
+/web/public/build-info.json
