@@ -149,7 +149,7 @@ describe('the demo story through the relayer', () => {
 
   it('ani posts as the coin', async () => {
     const r = await post(deps, announce, { as: 'ani', line: 1 });
-    expect(r.body).toEqual({ txHash: expect.any(String) });
+    expect(r.body).toEqual({ txHash: expect.any(String), announcementIndex: 0 });
     const [a] = await rpc.view<any[]>(sb.contractId, 'get_announcements', { limit: 1 });
     expect(a).toMatchObject({ ceo: sb.ani.accountId, line: 1 });
     expect(a.text).toContain('1,400,000');
@@ -190,7 +190,7 @@ describe('the demo story through the relayer', () => {
 
   it('budi posts and the post appears', async () => {
     const r = await post(deps, announce, { as: 'budi', line: 6 });
-    expect(r.body).toEqual({ txHash: expect.any(String) });
+    expect(r.body).toEqual({ txHash: expect.any(String), announcementIndex: 1 });
     const [a] = await rpc.view<any[]>(sb.contractId, 'get_announcements', { limit: 1 });
     expect(a).toMatchObject({ ceo: sb.budi.accountId, line: 6 });
     expect(a.text).toBe('1,250,000 CTO burned so far. Supply only goes down.');

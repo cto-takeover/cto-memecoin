@@ -1,6 +1,6 @@
 // GET /api/demo/state: both demo accounts' balances, the CEO, the price.
 import { defaultDeps, json, originAllowed } from '../_lib/http.js';
-import { relayerError } from '../_lib/errors.js';
+import { relayerError } from '../../src/lib/near-errors.js';
 import { state } from '../_lib/relayer.js';
 
 export async function GET(req: Request): Promise<Response> {

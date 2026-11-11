@@ -9,5 +9,5 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["api/**/*.ts", "src/lib/reference.ts", "test/relayer/**/*.ts", "vitest.relayer.config.ts"]
+  "include": ["api/**/*.ts", "src/lib/reference.ts", "src/lib/near-errors.ts", "test/relayer/**/*.ts", "vitest.relayer.config.ts"]
 }

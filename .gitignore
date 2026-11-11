@@ -7,3 +7,4 @@ spike/keys/
 spike/tx-*.json
 __pycache__/
 .vercel/
+web/dist/

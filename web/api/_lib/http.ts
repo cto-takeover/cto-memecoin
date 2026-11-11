@@ -1,6 +1,6 @@
 // Web-standard Request/Response glue shared by the three Vercel functions.
 import { configFromEnv, type RelayerConfig } from './config.js';
-import { relayerError } from './errors.js';
+import { relayerError } from '../../src/lib/near-errors.js';
 import { RateLimiter, type Deps, type Reply } from './relayer.js';
 import { Rpc } from './rpc.js';
 

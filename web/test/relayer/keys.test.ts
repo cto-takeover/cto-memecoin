@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { findVoiceKey, voiceKeyPair, voiceSeed } from '../../api/_lib/keys.js';
-import { errorPath, fromFailure, fromRpcError } from '../../api/_lib/errors.js';
+import { errorPath, fromFailure, fromRpcError } from '../../src/lib/near-errors.js';
 import { RateLimiter } from '../../api/_lib/relayer.js';
 
 const SECRET = '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f';

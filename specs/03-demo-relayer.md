@@ -8,7 +8,7 @@ Three Vercel serverless functions (Node, TypeScript, `near-api-js`) that sign fo
 | --- | --- | --- | --- |
 | `GET /api/demo/state` | none | Reads both accounts' CTO and NEAR balances, current CEO, current price | `{ ani, budi, ceo, price, decaySecondsLeft }` |
 | `POST /api/demo/take-seat` | `{ as: "ani" \| "budi", face: {bg,eyes,mouth,extra}, maxPrice }` | Signs `take_seat` on `demo-cto.testnet` as that account, 0.25 NEAR attached, with the next derived voice public key | `{ txHash, takeoverIndex }` or `{ error }` |
-| `POST /api/demo/announce` | `{ as, line }` (line ∈ demo buttons) | Signs `announce(line)` as `demo-cto.testnet` with that account's latest derived voice key | `{ txHash }` or `{ error }` |
+| `POST /api/demo/announce` | `{ as, line }` (line ∈ demo buttons) | Signs `announce(line)` as `demo-cto.testnet` with that account's latest derived voice key | `{ txHash, announcementIndex }` or `{ error }` |
 
 `error` is NEAR's own error passed through whole: `{ type: "InvalidTxError.InvalidAccessKeyError.AccessKeyNotFound", message, raw }` (type = the path of keys in NEAR's error object). The web app prints `raw` in the rejected panel.
 

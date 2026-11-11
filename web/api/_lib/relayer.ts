@@ -3,7 +3,7 @@
 // NEAR's answers are returned unedited.
 import { KeyPair, KeyPairSigner, actions, baseDecode, createTransaction, type KeyPairString } from 'near-api-js';
 import { WHO, type RelayerConfig, type Who } from './config.js';
-import { fromFailure, fromRpcError, relayerError, type ApiError } from './errors.js';
+import { fromFailure, fromRpcError, relayerError, type ApiError } from '../../src/lib/near-errors.js';
 import { findVoiceKey, parseSecret, voiceKeyPair } from './keys.js';
 import { Rpc, RpcFailure, type RpcResponse } from './rpc.js';
 
@@ -318,8 +318,9 @@ export async function announce(deps: Deps, body: Body, ip: string): Promise<Repl
     const call = actions.functionCall('announce', { line: req.line }, ANNOUNCE_GAS, 0n);
     const sent = await signAndSend(deps, config.contractId, voice, config.contractId, [call]);
     if (!sent.ok) return nearReply(deps, 'announce', sent);
+    const announcementIndex: number | undefined = eventData(sent.logs, 'announcement')?.index;
     deps.log(`announce ok tx ${sent.txHash}`);
-    return { status: 200, body: { txHash: sent.txHash } };
+    return { status: 200, body: { txHash: sent.txHash, announcementIndex } };
   } catch (e) {
     return readFailure(e);
   }
