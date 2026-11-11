@@ -95,8 +95,26 @@ A failure prints `FAIL  <same line>` with expected vs actual, and exits 1. Befor
 ## Done when
 
 - [ ] M8: `npm run verify` prints the 12 PASS lines on a clean clone with Rust, and the live lines without Rust
-- [ ] `npm run test:relayer` passes
+- [x] `npm run test:relayer` passes (40 tests)
 - [ ] `npm run test:e2e` passes E2E-1 to E2E-8 against the deployed app on Fri Nov 13, and again right before submitting
 - [ ] Wallet-mode manual check done and recorded as a GIF
 - [ ] CI green on the submitted commit
 - [ ] Receipts shows the same verify output as the latest CI run
+
+## Build notes (Wed Nov 11)
+
+- **`npm run verify`** = `verify/run.mjs`. Stdout is exactly the 12 lines and the total; progress goes to stderr. `--out FILE` also writes the output with a `# commit · time` header (for `web/public/verify.txt`). Exit 1 on any FAIL.
+  - Lines 1–7 come from `cargo test -p cto --lib` and the sandbox story (`--nocapture`): each line needs its numbered story steps printed *and* the whole story to pass. Line 1 also needs `story_numbers` and `split_rounds_down_and_always_adds_up`; line 7 also needs the three decay unit tests.
+  - The sandbox tests a fresh `cargo near build` when cargo-near is installed, otherwise the committed `res/cto.wasm` (`CTO_WASM`, read by `tests/sandbox.rs`).
+  - Live layer (`verify/live.mjs`, also runnable alone as `npm run verify:live`): keys line per coin also fails on more than one function-call key or one not limited to `announce`; "deployed code matches res/cto.wasm" also compares `get_config` field by field with `constants.json`; "face changes in ft_metadata" also turns FAIL if the live icon ≠ `face_svg(get_seat.face)`. A coin with no account or no code prints `SKIP (not deployed yet)`; an RPC failure is a FAIL. Env overrides: `NEAR_RPC_URL`, `MAIN_CONTRACT_ID`, `DEMO_CONTRACT_ID`, `CTO_WASM`.
+  - Evidence: against testnet before deploy, 8 PASS + 4 SKIP; against `npm run dev:chain` (both coins), 12 PASS; with no `cargo` on PATH, 4 PASS + 8 SKIP with the CI link; a wrong wasm and a dead RPC print FAIL with expected vs actual.
+- **`/build-info.json`**: `scripts/build-info.mjs` runs as the web `prebuild` and writes `{ codeHash, wasm, commit }` from `res/cto.wasm` (git-ignored, regenerated on every build; Vercel clones the whole repo, so `../res` is there). No wasm, no file.
+- **E2E** (`playwright.config.ts`, `e2e/`): `npm run test:e2e` needs `E2E_BASE_URL` (the deployed app); chain ids default to `constants.json`. `npm run test:e2e:local` (`e2e/local.mjs`) starts `dev-chain.mjs` and Vite on :5199 and runs the same suite with `E2E_*` env. 17 tests: E2E-8 runs at 1440 and 375 px.
+  - A signing budget (`e2e/chain.ts`, ledger in the OS temp dir) keeps the suite under the relayer's 6/min and one-takeover-per-10-s limits.
+  - **E2E-4**: two clicks "at once" would hit the relayer's 10 s takeover gap (spec 3) instead of the contract. So context B's clock is paused after it loads the desk (its quote goes stale, as in a background tab), A takes the seat, and B clicks once the gap allows. The contract's own "price moved" error comes back; B's balance and the seat are unchanged.
+  - E2E-1 also checks the face on chain equals the 4 parts picked and that the link's hash is a successful tx (RPC `tx`); the nearblocks URL is asserted only off-sandbox (`E2E_EXPLORER`).
+  - E2E-2 holds the relayer response (`page.route`) and asserts no REJECTED stamp exists until NEAR's answer arrives. On a fresh chain it first makes a takeover between ani and budi.
+  - E2E-8 waits for entrance animations to finish; axe flagged a half-faded card otherwise.
+  - Evidence: 17/17 pass locally (2.0 min).
+- **CI** (`.github/workflows/ci.yml`): one job runs layer 3, `verify` (written to the run summary and uploaded as `verify-output`), then layer 6 on a local sandbox. A manual run with `e2e_base_url` adds the testnet e2e job.
+- `npm run test:all` = verify + test:relayer + test:e2e:local.

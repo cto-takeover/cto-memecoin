@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node ../scripts/build-info.mjs",
     "build": "tsc -p tsconfig.json && vite build",
     "preview": "vite preview",
     "test:relayer": "vitest run --config vitest.relayer.config.ts",

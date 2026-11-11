@@ -8,3 +8,6 @@ spike/tx-*.json
 __pycache__/
 .vercel/
 web/dist/
+web/public/build-info.json
+e2e/results/
+e2e/report/

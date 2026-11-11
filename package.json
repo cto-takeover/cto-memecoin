@@ -10,10 +10,19 @@
     "gen:faces": "python3 scripts/gen-faces.py",
     "dev:chain": "npm run build:contract && node scripts/dev-chain.mjs",
     "dev": "npm --prefix web run dev",
-    "build:web": "npm --prefix web run build"
+    "build:web": "npm --prefix web run build",
+    "verify": "node verify/run.mjs",
+    "verify:live": "node verify/live.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:local": "npm run build:contract && node e2e/local.mjs",
+    "test:all": "npm run verify && npm run test:relayer && npm run test:e2e:local"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.65.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cto-takeover/cto-memecoin"
   }
 }

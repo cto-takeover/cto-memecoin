@@ -170,7 +170,9 @@ fn error_path(resp: &Value) -> String {
 
 #[tokio::test]
 async fn story() -> TestResult<()> {
-    let wasm = std::fs::read(WASM).expect("build first: (cd contract && cargo near build non-reproducible-wasm)");
+    // CTO_WASM lets `npm run verify` test the committed res/cto.wasm when cargo-near is missing.
+    let wasm_path = std::env::var("CTO_WASM").unwrap_or_else(|_| WASM.to_string());
+    let wasm = std::fs::read(&wasm_path).unwrap_or_else(|e| panic!("{wasm_path}: {e}; build first: npm run build:contract"));
     let sandbox = near_sandbox::Sandbox::start_sandbox().await?;
     let net = NetworkConfig::from_rpc_url("sandbox", sandbox.rpc_addr.parse()?);
     let genesis_sk: near_api::SecretKey = near_sandbox::config::DEFAULT_GENESIS_ACCOUNT_PRIVATE_KEY.parse()?;

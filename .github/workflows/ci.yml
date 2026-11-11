@@ -1,0 +1,111 @@
+# All six test layers (spec 4), keyless, on every push.
+#   layer 3: npm run test:relayer      (Vitest against a sandbox-deployed coin)
+#   layers 1, 2, 4, 5: npm run verify  (the 12 lines; live lines read testnet)
+#   layer 6: npm run test:e2e:local    (Playwright against a local sandbox + dev server)
+# Run it by hand with an app URL to also run the e2e suite against the deployed app.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      e2e_base_url:
+        description: Deployed app URL for the testnet e2e run (leave empty to skip)
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      - name: Rust toolchain (from rust-toolchain.toml)
+        run: rustup toolchain install && cargo --version
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-near 0.23.0
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/near/cargo-near/releases/download/cargo-near-v0.23.0/cargo-near-installer.sh | sh
+          cargo near --version
+
+      - name: Install npm packages
+        run: npm ci && npm ci --prefix web
+
+      - name: "Layer 3: relayer tests (also builds the contract)"
+        run: npm run test:relayer
+
+      - name: "Layers 1, 2, 4, 5: npm run verify"
+        run: npm run verify -- --out verify.txt
+
+      - name: Verify output in the run summary
+        if: always()
+        run: |
+          if [ -f verify.txt ]; then
+            { echo '```'; cat verify.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verify-output
+          path: verify.txt
+          if-no-files-found: ignore
+
+      - name: Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: "Layer 6: e2e against a local sandbox"
+        run: node e2e/local.mjs
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-report
+          path: |
+            e2e/report
+            e2e/results
+
+  e2e-testnet:
+    if: github.event_name == 'workflow_dispatch' && inputs.e2e_base_url != ''
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: "Layer 6: e2e against the deployed app and demo-cto.testnet"
+        run: npm run test:e2e
+        env:
+          E2E_BASE_URL: ${{ inputs.e2e_base_url }}
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-testnet-report
+          path: |
+            e2e/report
+            e2e/results
