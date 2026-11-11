@@ -1,0 +1,19 @@
+{
+  "name": "cto-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:relayer": "vitest run --config vitest.relayer.config.ts",
+    "typecheck": "tsc -p tsconfig.api.json"
+  },
+  "dependencies": {
+    "@noble/curves": "^2.2.0",
+    "near-api-js": "^7.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "near-sandbox": "^0.3.5",
+    "typescript": "5.9",
+    "vitest": "^5.1.0"
+  }
+}

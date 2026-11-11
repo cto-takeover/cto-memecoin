@@ -119,6 +119,8 @@ pub struct Takeover {
     pub payout: U128,
     pub burned: U128,
     pub face: Face,
+    /// The voice key this takeover installed (deleted again by the next takeover).
+    pub voice_key: PublicKey,
     pub at_ns: U64,
     pub block_height: u64,
 }
@@ -357,6 +359,7 @@ impl Contract {
             payout: U128(q.payout),
             burned: U128(q.burned),
             face,
+            voice_key: new_ceo_key.clone(),
             at_ns: U64(now),
             block_height: env::block_height(),
         });

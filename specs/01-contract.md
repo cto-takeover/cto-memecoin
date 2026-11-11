@@ -119,3 +119,4 @@ Additions the spec did not name. None changes a rule above.
 - `get_history(from_index, limit)`: both optional; `from_index` counts back from the newest (0 = newest). `total_burned()` view added.
 - Events carry `data` as a one-element array, like NEP-141's. The faucet pool is minted to the coin account in the launch `ft_mint` event, and each claim is an `ft_transfer` from it, so indexers see balances that add up.
 - Sandbox tests use near-sandbox + near-api (what `cargo near new` ships today) instead of near-workspaces; same local node.
+- `Takeover` also stores `voice_key`, the key that takeover installed (added Nov 11 for spec 3): the relayer matches its derived key exactly, and the press office can show which key NEAR deleted.

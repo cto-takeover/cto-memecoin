@@ -235,6 +235,8 @@ fn decayed_takeover_pays_23_28() {
     ctx.now_s = 7 * DAY + 7 * DAY / 2;
     take(&mut c, &ctx, "budi.testnet", face(1, 1, 1, 1), 2, 1_200_000 * ONE);
     let t = &c.get_history(None, Some(1))[0];
+    assert_eq!(t.voice_key, key(2), "history keeps the key each takeover installed");
+    assert_eq!(c.get_history(Some(1), Some(1))[0].voice_key, key(1));
     assert_eq!(t.paid.0, 1_200_000 * ONE);
     assert_eq!(t.payout.0, 1_200_000 * ONE * 23 / 28);
     assert_invariants(&c, &["ani.testnet", "budi.testnet"]);

@@ -249,6 +249,7 @@ async fn story() -> TestResult<()> {
     assert!(r.logs().iter().any(|l| l.contains("\"seat_taken\"") && l.contains("\"face_id\":672")));
     let last = &w.view("get_history", json!({ "from_index": 0, "limit": 1 })).await?[0];
     assert_eq!(last["paid"], cto(1_400_000), "budi paid full price (sandbox slower than {DELAY_S} s?)");
+    assert_eq!(last["voice_key"], json!(budi_voice.public_key()), "history records the installed key");
     assert_eq!(w.balance(&ani).await?, 2_150_000 * ONE, "ani +1,150,000");
     assert_eq!(w.balance(&budi).await?, 600_000 * ONE);
     assert_eq!(w.supply().await?, TOTAL - 1_250_000 * ONE, "supply -250,000");

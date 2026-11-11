@@ -44,7 +44,19 @@ The contract accepts only line numbers (spec 1). Demo buttons offer six (from `r
 
 ## Done when
 
-- [ ] budi takes the seat from ani via `/take-seat`; the explorer shows ani +1,150,000 (starting from a fresh 1,000,000 price)
-- [ ] right after, `/announce` as ani with line 3 returns `AccessKeyNotFound` from NEAR, unedited
-- [ ] `/announce` as budi succeeds and the post appears in `get_announcements`
-- [ ] any other contract, method, account or line is refused with HTTP 400 before anything is signed
+- [ ] budi takes the seat from ani via `/take-seat`; the explorer shows ani +1,150,000 (starting from a fresh 1,000,000 price) (sandbox: pass Nov 11, `npm run test:relayer`; testnet: after deploy, spec 6)
+- [ ] right after, `/announce` as ani with line 3 returns `AccessKeyNotFound` from NEAR, unedited (sandbox: pass, and equal field for field to the same call sent straight to the node; testnet: after deploy)
+- [ ] `/announce` as budi succeeds and the post appears in `get_announcements` (sandbox: pass; testnet: after deploy)
+- [x] any other contract, method, account or line is refused with HTTP 400 before anything is signed (14 cases in `web/test/relayer/relayer.test.ts`, sign counter stays 0)
+
+## Build notes (added Nov 11 while implementing)
+
+- **Layout.** Logic in `web/api/_lib/` (`relayer.ts`, `keys.ts`, `errors.ts`, `rpc.ts`, `http.ts`, `config.ts`); `web/api/demo/{state,take-seat,announce}.ts` are thin web-standard handlers (`GET`/`POST(req: Request)`). Numbers and names come from `web/src/lib/reference.ts`, generated from `reference/*.json` by `scripts/gen-reference.mjs` (`--check` fails if stale).
+- **Error shape.** Every error is `{ error: { source, type, message, ... } }`. `source: "near"` adds `raw` (NEAR's object exactly as returned) and comes with HTTP 200, plus `txHash` when the transaction executed and failed (e.g. "price moved"). `source: "relayer"` errors: 400 `BadRequest`, 403 `Forbidden` (other origin), 429 `RateLimited`, 409 `NeverCeo` / `NoMatchingKey`, 503 `NotConfigured`, 502 for a failed read (with NEAR's error). The UI stamps REJECTED only for `source: "near"`.
+- **`type` and `message`** are read off NEAR's object, never reworded: `type` is the key path (below `TxExecutionError` for rejected transactions; e.g. `ActionError.kind.FunctionCallError.ExecutionError` for a panic), `message` the innermost value (NEAR's string, or its JSON).
+- **Signing without a lookup failure.** Nonces are read at `optimistic` finality, so a key added one block earlier counts. If NEAR has no such key, the relayer still signs (nonce = final height × 10^6) and sends, so the rejection is NEAR's own `AccessKeyNotFound` from `send_tx`, not a client-side "key not found".
+- **Voice key matching.** The contract now records `voice_key` in each history entry (spec 1 build notes). `/announce` finds the account's latest takeover, then the derived key whose public half equals that entry's `voice_key` (searching down from its index). This stays exact even if another takeover landed between reading the history length and the transaction.
+- **Rate limits** apply to the two signing endpoints; `/state` is read-only and not limited. Optional `contract` / `method` fields are accepted only if they name `demo-cto.testnet` and the endpoint's own method; any other field is a 400.
+- **Env** besides the three secrets (all optional, defaults from constants.json): `NEAR_RPC_URL`, `DEMO_CONTRACT_ID`, `ANI_ACCOUNT_ID`, `BUDI_ACCOUNT_ID`, `APP_ORIGINS` (extra allowed origins, comma list).
+- **Tests** (`npm run test:relayer` at the root): builds the wasm, then Vitest starts a local sandbox, deploys the real contract as the demo coin with the demo numbers and deletes its deployer key. 38 tests: key vector (computed independently with node:crypto), 14 refusals, 429s, origin, missing secrets, and the story.
+- TypeScript is pinned to 5.9 (Vite tooling targets 5.x).
