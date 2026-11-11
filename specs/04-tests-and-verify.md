@@ -94,9 +94,9 @@ A failure prints `FAIL  <same line>` with expected vs actual, and exits 1. Befor
 
 ## Done when
 
-- [ ] M8: `npm run verify` prints the 12 PASS lines on a clean clone with Rust, and the live lines without Rust
+- [x] M8: `npm run verify` prints the 12 PASS lines on a clean clone with Rust, and the live lines without Rust (12 PASS against both deployed coins, Wed Nov 11)
 - [x] `npm run test:relayer` passes (40 tests)
-- [ ] `npm run test:e2e` passes E2E-1 to E2E-8 against the deployed app on Fri Nov 13, and again right before submitting
+- [ ] `npm run test:e2e` passes E2E-1 to E2E-8 against the deployed app on Fri Nov 13, and again right before submitting (17/17 against https://cto-memecoin.vercel.app on Wed Nov 11; repeat before submitting)
 - [ ] Wallet-mode manual check done and recorded as a GIF
 - [ ] CI green on the submitted commit
 - [ ] Receipts shows the same verify output as the latest CI run

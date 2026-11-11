@@ -52,16 +52,16 @@ Follow `docs/video-script.md` (59 s, 7 scenes, same timing as the concept video)
 - [ ] Repo public, `res/cto.wasm` committed, CI green
 - [ ] README: one-line pitch, "do this, see that" steps, contract addresses, verify output, honest limits (testnet only, demo relayer, wallets may cache icons)
 - [x] ~~README names the team's other project, if one is submitted~~ N/A: CTO is the only submission (decided Wed Nov 11)
-- [ ] Live app URL works in a private window with no wallet
+- [x] Live app URL works in a private window with no wallet (https://cto-memecoin.vercel.app; e2e 17/17 against it)
 - [ ] 60-second video uploaded where the form asks
 - [ ] X post with #NEARHackathon, video attached
 - [ ] Submission form sent
 
 ## Done when
 
-- [ ] M5: both coins show zero keys in `list-keys` before the first takeover
-- [ ] `npm run verify` live layer passes against both coins
-- [ ] Front page on the main coin shows ani as CEO with her announcement
+- [x] M5: both coins show zero keys in `list-keys` before the first takeover (Wed Nov 11, after `delete-keys`: empty tables)
+- [x] `npm run verify` live layer passes against both coins (12 PASS, `web/public/verify.txt`)
+- [x] Front page on the main coin shows ani as CEO with her announcement (face #2,626, line 1, one `announce`-only key)
 
 ## Build notes (Wed Nov 11)
 
@@ -74,3 +74,4 @@ Follow `docs/video-script.md` (59 s, 7 scenes, same timing as the concept video)
 - **Vercel** (Wed Nov 11): project `cto-memecoin` made from the CLI (root directory `web`, Node 26), the three production secrets piped straight from the key files, live at https://cto-memecoin.vercel.app (already in the README). The Vercel GitHub app is not installed on the `cto-takeover` org, so pushes do not redeploy: run `npx vercel@65.14.0 deploy --prod` from the repo root. `.vercelignore` uploads only `web/`, `reference/`, `res/`, `verify/` and `scripts/` (the root has 6 GB of Rust build output).
 - **RPC** is now `https://rpc.testnet.fastnear.com` (`constants.json`). `rpc.testnet.near.org` is deprecated: it answered the live app with HTTP 429 after about 20 calls, which the browser reports as a CORS error. FastNEAR took 120 parallel calls without a 429 and returns NEAR's `AccessKeyNotFound` error unchanged.
 - `LICENSE` (MIT, matching `contract/Cargo.toml`) backs "open source" in the footer.
+- **Deployed early, Wed Nov 11** (instead of Fri Nov 13): both coins deployed and initialised (txs `CvCXuMEN…`, `9PNWTKh4…`), keys deleted (`Gh1d42RZ…`, `73PJhwi7…`), main coin seeded: ani and budi claimed the faucet, ani took the vacant seat with face #2,626 (`2ANvgQBr…`) and posted line 1 with her voice key from `~/.cto-keys/ani-main.json` (`G3pfmiPY…`). Budi's takeover is left for the video.
