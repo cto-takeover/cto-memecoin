@@ -115,11 +115,11 @@ npm run verify:live       # full-access keys 0 on both, code hash, config, suppl
 
 Done on Wed Nov 11 from the CLI: project \`cto-memecoin\` (root directory \`web\`, Node 26), production secrets \`ANI_FULL_KEY\`, \`BUDI_FULL_KEY\` and \`VOICE_SECRET\` added straight from the key files, live at https://ctotimes.xyz (domain at Hostinger: A \`@\` → Vercel, CNAME \`www\` → Vercel, \`www\` redirects to the apex; https://cto-memecoin.vercel.app also works). \`.vercelignore\` uploads only what the build reads. **Never change \`VOICE_SECRET\`**: the demo coin's voice keys are derived from it.
 
-After step 3, check the app picks up the deployed coins (a fresh deploy is only needed if the repo changed):
+The project is connected to GitHub (Wed Nov 11): every push to \`main\` redeploys production. After step 3, check the app picks up the deployed coins:
 
 \`\`\`bash
 npx vercel@65.14.0 env ls                 # the three secrets, Production
-npx vercel@65.14.0 deploy --prod          # from the repo root
+npx vercel@65.14.0 ls cto-memecoin        # latest deployment from main is Ready
 curl -s https://ctotimes.xyz/api/demo/state | head -c 300   # ani and budi balances, the seat
 \`\`\`
 
@@ -161,8 +161,7 @@ Expected: the announcement reads "The face is mine until someone pays ${commas(C
 
 \`\`\`bash
 npm run verify -- --out web/public/verify.txt --readme   # 12 PASS; also updates README.md
-git add web/public/verify.txt README.md && git commit -m "Verify output after deploy" && git push
-npx vercel@65.14.0 deploy --prod   # Receipts shows the new verify.txt (skip if Vercel is connected to GitHub)
+git add web/public/verify.txt README.md && git commit -m "Verify output after deploy" && git push   # Vercel redeploys; Receipts shows it
 
 E2E_BASE_URL=https://ctotimes.xyz npm run test:e2e
 gh workflow run ci.yml -f e2e_base_url=https://ctotimes.xyz   # CI's testnet e2e run
