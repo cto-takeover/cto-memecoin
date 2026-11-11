@@ -17,3 +17,5 @@ Status: concept video built from the design mockups, labelled DESIGN PREVIEW on 
 ## Swap plan for the final submission (Sat Nov 14)
 Keep the script and timing. Re-record scenes 2–6 from the real testnet app at 1920x1080 and replace scenes/s2–s6. Scene 5 must show the real AccessKeyNotFound error from NEAR and real explorer links. Then remove the DESIGN PREVIEW tag.
 
+Film on the demo coin (`demo-cto.testnet`, no wallet), following the "Video" section of `scripts/deploy.md`. Scene 4's burn and supply figures will show the demo coin's real totals instead of 1,250,000 / 998,750,000; the voiceover stays the same.
+

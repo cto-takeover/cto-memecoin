@@ -146,6 +146,13 @@ E2E_BASE_URL=https://<your-app>.vercel.app npm run test:e2e
 gh workflow run ci.yml -f e2e_base_url=https://<your-app>.vercel.app   # CI's testnet e2e run
 ```
 
-## Video note (Sat Nov 14)
+## Video (Sat Nov 14): film on the demo coin
 
-The story numbers (1,000,000 → 1,400,000, ani +1,150,000) come out exactly on the **demo coin** when ani takes the seat at the floor price and budi takes over within 2 minutes; "Play as" then also lets the press office try ani's deleted key. On the main coin budi would need a wallet, and only ani's own browser holds her old key.
+Scenes 2–6 of `docs/video-script.md` are filmed on **demo-cto.testnet** in a private window with no wallet; "Play as" signs for ani and budi through the relayer.
+
+1. Wait until nobody has taken the demo seat for 5 minutes (including e2e runs): the price is back at the floor, 1,000,000 CTO.
+2. Play as ani: take the seat with face #2,626 (batik / laser / grin / CEO tie), then post a line as the coin. Film the Front page (scene 2).
+3. Within 2 minutes of ani's takeover (before the price starts to fall), play as budi: pick face #672 part by part and press TAKE THE SEAT (scenes 3 and 4). Budi pays 1,400,000; ani gets +1,150,000.
+4. Press office: TRY POSTING AS ani. Film NEAR's error and the REJECTED BY NEAR stamp (scene 5), then Receipts (scene 6).
+
+Total burned and supply on screen are the demo coin's real totals, so they will not read 1,250,000 / 998,750,000; the voiceover does not say them. If a take goes wrong, wait 5 quiet minutes and start again.
