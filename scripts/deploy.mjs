@@ -113,14 +113,14 @@ npm run verify:live       # full-access keys 0 on both, code hash, config, suppl
 
 ## 4. Vercel (demo relayer + app)
 
-Done on Wed Nov 11 from the CLI: project \`cto-memecoin\` (root directory \`web\`, Node 26), production secrets \`ANI_FULL_KEY\`, \`BUDI_FULL_KEY\` and \`VOICE_SECRET\` added straight from the key files, live at https://cto-memecoin.vercel.app. \`.vercelignore\` uploads only what the build reads. **Never change \`VOICE_SECRET\`**: the demo coin's voice keys are derived from it.
+Done on Wed Nov 11 from the CLI: project \`cto-memecoin\` (root directory \`web\`, Node 26), production secrets \`ANI_FULL_KEY\`, \`BUDI_FULL_KEY\` and \`VOICE_SECRET\` added straight from the key files, live at https://ctotimes.xyz (domain at Hostinger: A \`@\` → Vercel, CNAME \`www\` → Vercel, \`www\` redirects to the apex; https://cto-memecoin.vercel.app also works). \`.vercelignore\` uploads only what the build reads. **Never change \`VOICE_SECRET\`**: the demo coin's voice keys are derived from it.
 
 After step 3, check the app picks up the deployed coins (a fresh deploy is only needed if the repo changed):
 
 \`\`\`bash
 npx vercel@65.14.0 env ls                 # the three secrets, Production
 npx vercel@65.14.0 deploy --prod          # from the repo root
-curl -s https://cto-memecoin.vercel.app/api/demo/state | head -c 300   # ani and budi balances, the seat
+curl -s https://ctotimes.xyz/api/demo/state | head -c 300   # ani and budi balances, the seat
 \`\`\`
 
 Open the app in a private window: the demo coin's Front page shows SEAT OPEN; Receipts shows full-access keys 0.
@@ -164,8 +164,8 @@ npm run verify -- --out web/public/verify.txt --readme   # 12 PASS; also updates
 git add web/public/verify.txt README.md && git commit -m "Verify output after deploy" && git push
 npx vercel@65.14.0 deploy --prod   # Receipts shows the new verify.txt (skip if Vercel is connected to GitHub)
 
-E2E_BASE_URL=https://cto-memecoin.vercel.app npm run test:e2e
-gh workflow run ci.yml -f e2e_base_url=https://cto-memecoin.vercel.app   # CI's testnet e2e run
+E2E_BASE_URL=https://ctotimes.xyz npm run test:e2e
+gh workflow run ci.yml -f e2e_base_url=https://ctotimes.xyz   # CI's testnet e2e run
 \`\`\`
 
 ## Video (Sat Nov 14): film on the demo coin

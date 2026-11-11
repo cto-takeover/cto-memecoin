@@ -4,7 +4,7 @@
 
 Fired, but paid.
 
-- **App:** <!-- app-url -->[cto-memecoin.vercel.app](https://cto-memecoin.vercel.app)<!-- /app-url -->
+- **App:** <!-- app-url -->[ctotimes.xyz](https://ctotimes.xyz)<!-- /app-url -->
 - **Coins:** [`cto.testnet`](https://testnet.nearblocks.io/address/cto.testnet) (main, 7 days idle + 7 days decay) · [`demo-cto.testnet`](https://testnet.nearblocks.io/address/demo-cto.testnet) (demo, 2 + 3 minutes)
 - **Proof:** [CI runs all six test layers](https://github.com/cto-takeover/cto-memecoin/actions/workflows/ci.yml) · `npm run verify` (below)
 - NEAR Hackathon, Memecoins track. Testnet only · no sale · no admin keys · open source (MIT).
