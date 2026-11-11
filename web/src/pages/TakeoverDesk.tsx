@@ -114,9 +114,25 @@ export function TakeoverDesk() {
   );
 
   async function showSequence(txHash: string, index: number | undefined, before: { seat: SeatView; burned: string }, accountId: string, withKey?: () => void) {
+    // The takeover already succeeded; a failed read (rate limit, lagging node) must
+    // not lose the sequence, so read the history up to 4 times.
+    let t: Takeover | undefined;
+    let readError: unknown;
+    for (let i = 0; i < 4 && !t; i++) {
+      if (i) await new Promise((r) => setTimeout(r, 1000 * i));
+      try {
+        const recent = await view<Takeover[]>(contractId, 'get_history', { from_index: 0, limit: 10 });
+        t = recent.find((x) => (index !== undefined ? x.index === index : x.ceo === accountId));
+      } catch (e) {
+        readError = e;
+      }
+    }
     const fresh = await refresh();
-    const recent = await view<Takeover[]>(contractId, 'get_history', { from_index: 0, limit: 10 });
-    const t = recent.find((x) => (index !== undefined ? x.index === index : x.ceo === accountId));
+    if (!t && readError) {
+      setStatus({ kind: 'info', message: `The takeover went through (tx ${txHash}), but the history could not be read: ${readError instanceof Error ? readError.message : String(readError)}` });
+      void balances.refresh();
+      return;
+    }
     if (t) saveTx(contractId, `takeover:${t.index}`, txHash);
     setStatus({ kind: 'idle' });
     void balances.refresh();
@@ -125,7 +141,7 @@ export function TakeoverDesk() {
       takeover: t,
       oldFace: before.seat.face,
       burnedBefore: before.burned,
-      burnedTotal: fresh?.burned ?? before.burned,
+      burnedTotal: fresh?.burned ?? (BigInt(before.burned) + BigInt(t.burned)).toString(),
       txHash,
       contractId,
       onDownloadKey: withKey,

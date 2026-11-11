@@ -49,12 +49,12 @@ PASS  supply falls exactly 0.25x
 PASS  old key rejected on chain (AccessKeyNotFound)
 PASS  new key can only call announce
 PASS  price decays after the idle window, floor holds
-SKIP  full-access keys on cto.testnet: 0  (not deployed yet)
-SKIP  full-access keys on demo-cto.testnet: 0  (not deployed yet)
-SKIP  deployed code matches res/cto.wasm  (not deployed yet)
-SKIP  total supply = 1,000,000,000 - burned  (not deployed yet)
+PASS  full-access keys on cto.testnet: 0
+PASS  full-access keys on demo-cto.testnet: 0
+PASS  deployed code matches res/cto.wasm
+PASS  total supply = 1,000,000,000 - burned
 PASS  simulation follows the contract math
-8 passed · 4 skipped · no keys needed
+12 passed · no keys needed
 ```
 <!-- verify:end -->
 

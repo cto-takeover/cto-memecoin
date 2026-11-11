@@ -17,7 +17,8 @@ const NO_CODE = '11111111111111111111111111111111';
 
 export function settings(env = process.env) {
   return {
-    rpc: env.NEAR_RPC_URL || C.rpc,
+    // Tried in order on rate limits or network errors; an override has no fallback.
+    rpcs: env.NEAR_RPC_URL ? [env.NEAR_RPC_URL] : [C.rpc, C.rpc_fallback],
     main: env.MAIN_CONTRACT_ID || C.coins.main.account,
     demo: env.DEMO_CONTRACT_ID || C.coins.demo.account,
     wasm: env.CTO_WASM || join(ROOT, 'res/cto.wasm'),
@@ -53,23 +54,40 @@ const commas = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 const whole = (base) => commas(BigInt(base) / ONE) + (BigInt(base) % ONE ? '.' + (BigInt(base) % ONE).toString().padStart(C.decimals, '0').replace(/0+$/, '') : '');
 
 class Rpc {
-  constructor(url) {
-    this.url = url;
+  constructor(urls) {
+    this.urls = urls;
   }
+  /** One read; a rate limit, 5xx or network error tries the next endpoint (3 rounds). */
   async call(method, params) {
-    const res = await fetch(this.url, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', id: 'verify', method, params }),
-      signal: AbortSignal.timeout(20_000),
-    });
-    const body = await res.json();
-    if (body.error) {
-      const e = new Error(JSON.stringify(body.error));
-      e.rpc = body.error;
-      throw e;
+    let last;
+    for (let i = 0; i < 3 * this.urls.length; i++) {
+      const url = this.urls[i % this.urls.length];
+      if (i >= this.urls.length) await new Promise((r) => setTimeout(r, 1000 * Math.floor(i / this.urls.length)));
+      let res, body;
+      try {
+        res = await fetch(url, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ jsonrpc: '2.0', id: 'verify', method, params }),
+          signal: AbortSignal.timeout(20_000),
+        });
+        body = await res.json();
+      } catch (e) {
+        last = new Error(`${url}: ${e.message}`);
+        continue;
+      }
+      if (res.status === 429 || body.error?.code === -429 || (res.status >= 500 && !body.error?.name)) {
+        last = new Error(`${url}: ${JSON.stringify(body.error ?? body)}`);
+        continue;
+      }
+      if (body.error) {
+        const e = new Error(JSON.stringify(body.error));
+        e.rpc = body.error;
+        throw e;
+      }
+      return body.result;
     }
-    return body.result;
+    throw last;
   }
   query(params) {
     return this.call('query', { finality: 'final', ...params });
@@ -134,7 +152,7 @@ const configDiff = (want, got) =>
  * folds into "face changes in ft_metadata".
  */
 export async function liveChecks(s = settings()) {
-  const rpc = new Rpc(s.rpc);
+  const rpc = new Rpc(s.rpcs);
   const coins = [
     { id: s.main, rules: C.coins.main },
     { id: s.demo, rules: C.coins.demo },
@@ -143,7 +161,7 @@ export async function liveChecks(s = settings()) {
     try {
       c.account = await deployed(rpc, c.id);
     } catch (e) {
-      c.error = `RPC ${s.rpc}: ${e.message}`;
+      c.error = `RPC: ${e.message}`;
     }
   }
   const live = coins.filter((c) => c.account);
@@ -207,7 +225,7 @@ export async function liveChecks(s = settings()) {
     try {
       return await fn();
     } catch (e) {
-      return { status: 'FAIL', detail: [`RPC ${s.rpc}: ${e.message}`] };
+      return { status: 'FAIL', detail: [`RPC: ${e.message}`] };
     }
   };
 

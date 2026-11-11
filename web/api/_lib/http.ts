@@ -12,7 +12,7 @@ export function defaultDeps(): Deps {
     const config = configFromEnv();
     shared = {
       config,
-      rpc: new Rpc(config.rpcUrl),
+      rpc: new Rpc(config.rpcUrls),
       limiter: new RateLimiter(),
       now: () => Date.now(),
       // Logs hold tx hashes and error types only, never keys.

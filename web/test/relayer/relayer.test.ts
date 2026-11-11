@@ -19,7 +19,7 @@ function setup(over: Partial<RelayerConfig> = {}) {
   const logs: string[] = [];
   const config: RelayerConfig = {
     ...configFromEnv({}),
-    rpcUrl: sb.rpcUrl,
+    rpcUrls: [sb.rpcUrl],
     contractId: sb.contractId,
     accounts: { ani: sb.ani, budi: sb.budi },
     voiceSecret: SECRET,

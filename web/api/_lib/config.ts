@@ -12,7 +12,8 @@ export interface DemoAccount {
 }
 
 export interface RelayerConfig {
-  rpcUrl: string;
+  /** JSON-RPC endpoints, tried in order (see src/lib/jsonrpc.ts). */
+  rpcUrls: string[];
   /** The only contract the relayer will ever sign for. */
   contractId: string;
   accounts: Record<Who, DemoAccount>;
@@ -39,7 +40,7 @@ export function nearToYocto(near: string): bigint {
 
 export function configFromEnv(env: Record<string, string | undefined> = process.env): RelayerConfig {
   return {
-    rpcUrl: env.NEAR_RPC_URL || constants.rpc,
+    rpcUrls: env.NEAR_RPC_URL ? [env.NEAR_RPC_URL] : [constants.rpc, constants.rpc_fallback],
     contractId: env.DEMO_CONTRACT_ID || constants.coins.demo.account,
     accounts: {
       ani: { accountId: env.ANI_ACCOUNT_ID || constants.demo_accounts.ani, fullKey: env.ANI_FULL_KEY },

@@ -5,9 +5,11 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import constants from '../reference/constants.json' with { type: 'json' };
+import { postRpc } from '../web/src/lib/jsonrpc';
 
 export const S = {
-  rpc: process.env.E2E_RPC_URL || constants.rpc,
+  /** JSON-RPC endpoints, tried in order; a sandbox override has no fallback. */
+  rpcs: process.env.E2E_RPC_URL ? [process.env.E2E_RPC_URL] : [constants.rpc, constants.rpc_fallback],
   demo: process.env.E2E_DEMO_ID || constants.coins.demo.account,
   main: process.env.E2E_MAIN_ID || constants.coins.main.account,
   ani: process.env.E2E_ANI_ID || constants.demo_accounts.ani,
@@ -47,12 +49,7 @@ export interface Announcement {
 }
 
 async function rpc<T>(method: string, params: unknown): Promise<T> {
-  const res = await fetch(S.rpc, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 'e2e', method, params }),
-  });
-  const body = await res.json();
+  const body = await postRpc(S.rpcs, method, params, 'e2e');
   if (body.error) throw new Error(`${method}: ${JSON.stringify(body.error)}`);
   return body.result as T;
 }

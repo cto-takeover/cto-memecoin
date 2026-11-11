@@ -5,7 +5,8 @@ import { announcementLines, constants } from './lib/reference';
 export type CoinKey = 'demo' | 'main';
 export type Who = 'ani' | 'budi';
 
-export const RPC_URL = import.meta.env.VITE_NEAR_RPC_URL || constants.rpc;
+/** JSON-RPC endpoints, tried in order (see lib/jsonrpc.ts). A sandbox override has no fallback. */
+export const RPC_URLS: string[] = import.meta.env.VITE_NEAR_RPC_URL ? [import.meta.env.VITE_NEAR_RPC_URL] : [constants.rpc, constants.rpc_fallback];
 export const NETWORK = constants.network;
 
 export const COINS: Record<CoinKey, { key: CoinKey; contractId: string; label: string; symbol: string }> = {

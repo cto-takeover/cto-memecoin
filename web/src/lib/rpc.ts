@@ -1,6 +1,8 @@
 // Browser JSON-RPC: views, keys, code hash, and raw send_tx. Responses come back
-// as NEAR sent them so errors can be shown unedited.
-import { RPC_URL } from '../config';
+// as NEAR sent them so errors can be shown unedited; rate limits fall back to the
+// second endpoint (lib/jsonrpc.ts).
+import { RPC_URLS } from '../config';
+import { postRpc, type RpcResponse } from './jsonrpc';
 import type { AccessKeyInfo } from './types';
 
 export class RpcFailure extends Error {
@@ -9,19 +11,11 @@ export class RpcFailure extends Error {
   }
 }
 
-export interface RpcResponse {
-  result?: any;
-  error?: any;
-}
+export type { RpcResponse };
 
 let nextId = 0;
-export async function rpcCall(method: string, params: unknown): Promise<RpcResponse> {
-  const res = await fetch(RPC_URL, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: `cto-${nextId++}`, method, params }),
-  });
-  return (await res.json()) as RpcResponse;
+export function rpcCall(method: string, params: unknown): Promise<RpcResponse> {
+  return postRpc(RPC_URLS, method, params, `cto-${nextId++}`);
 }
 
 async function query(params: Record<string, unknown>): Promise<any> {

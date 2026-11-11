@@ -1,12 +1,8 @@
-// Plain JSON-RPC over fetch. Responses are returned as NEAR sent them, so errors
-// can be passed through unedited.
+// JSON-RPC over fetch (with the fallback endpoint in src/lib/jsonrpc.ts). Responses
+// are returned as NEAR sent them, so errors can be passed through unedited.
+import { postRpc, type RpcResponse } from '../../src/lib/jsonrpc.js';
 
-export interface RpcResponse {
-  jsonrpc?: string;
-  id?: unknown;
-  result?: any;
-  error?: any;
-}
+export type { RpcResponse };
 
 /** A failed read (view call, account lookup). Carries NEAR's error object as is. */
 export class RpcFailure extends Error {
@@ -20,20 +16,13 @@ export type KeyLookup =
   | { found: false; raw: unknown };
 
 export class Rpc {
-  constructor(readonly url: string) {}
+  readonly urls: readonly string[];
+  constructor(url: string | readonly string[]) {
+    this.urls = typeof url === 'string' ? [url] : url;
+  }
 
-  async call(method: string, params: unknown): Promise<RpcResponse> {
-    const res = await fetch(this.url, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', id: 'cto', method, params }),
-    });
-    const text = await res.text();
-    try {
-      return JSON.parse(text) as RpcResponse;
-    } catch {
-      throw new RpcFailure({ status: res.status, body: text });
-    }
+  call(method: string, params: unknown): Promise<RpcResponse> {
+    return postRpc(this.urls, method, params);
   }
 
   private async query(params: Record<string, unknown>): Promise<any> {
