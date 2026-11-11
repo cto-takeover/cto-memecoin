@@ -6,7 +6,7 @@
     "build:contract": "cargo near build non-reproducible-wasm --manifest-path contract/Cargo.toml",
     "gen:reference": "node scripts/gen-reference.mjs",
     "check:reference": "node scripts/gen-reference.mjs --check",
-    "test:relayer": "npm run check:reference && python3 scripts/gen-faces.py --check && npm run build:contract && npm --prefix web run typecheck && npm --prefix web run test:relayer",
+    "test:relayer": "npm run check:reference && node scripts/deploy.mjs --check && python3 scripts/gen-faces.py --check && npm run build:contract && npm --prefix web run typecheck && npm --prefix web run test:relayer",
     "gen:faces": "python3 scripts/gen-faces.py",
     "dev:chain": "npm run build:contract && node scripts/dev-chain.mjs",
     "dev": "npm --prefix web run dev",
@@ -15,7 +15,8 @@
     "verify:live": "node verify/live.mjs",
     "test:e2e": "playwright test",
     "test:e2e:local": "npm run build:contract && node e2e/local.mjs",
-    "test:all": "npm run verify && npm run test:relayer && npm run test:e2e:local"
+    "test:all": "npm run verify && npm run test:relayer && npm run test:e2e:local",
+    "gen:deploy": "node scripts/deploy.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

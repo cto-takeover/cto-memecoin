@@ -3,6 +3,7 @@
 //
 //   npm run verify                      # testnet coins
 //   npm run verify -- --out verify.txt  # also write the output to a file
+//   npm run verify -- --readme          # also update the verify block in README.md
 //
 // Without Rust the Rust layers print SKIP and the live lines still run.
 // Env overrides for a local sandbox: see verify/live.mjs.
@@ -133,6 +134,15 @@ const total = [failed && `${failed} failed`, `${passed} passed`, skipped && `${s
 const output = [...lines.map(format), total].join('\n');
 console.log(output);
 
+if (process.argv.includes('--readme')) {
+  // Replace the block between the verify markers in README.md with this output.
+  const readme = join(ROOT, 'README.md');
+  const text = readFileSync(readme, 'utf8');
+  const re = /(<!-- verify:start -->\n)[\s\S]*?(<!-- verify:end -->)/;
+  if (!re.test(text)) throw new Error('README.md has no verify markers');
+  writeFileSync(readme, text.replace(re, `$1\`\`\`text\n${output}\n\`\`\`\n$2`));
+  log('updated the verify block in README.md');
+}
 if (outFile) {
   const commit = spawnSync('git', ['rev-parse', '--short', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).stdout.trim();
   writeFileSync(outFile, `$ npm run verify  # commit ${commit || 'unknown'} · ${new Date().toISOString().replace(/\.\d+Z$/, 'Z')}\n${output}\n`);
