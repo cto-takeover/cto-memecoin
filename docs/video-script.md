@@ -12,10 +12,11 @@ Status: concept video built from the design mockups, labelled DESIGN PREVIEW on 
 | 23.1–33.2s | Takeover: BREAKING headline, FIRED!, new face drops, NEW CEO, +1,150,000 to Ani, burn 1,250,000, supply 998,750,000 | Ani is fired, but paid: 1.15 million CTO. The rest is burned forever, so every fight for the seat shrinks the supply. |
 | 33.2–45.4s | Wow: Ani's post REJECTED BY NEAR + error; ani key DELETED, budi key ACTIVE, +1,150,000 Fired, but paid | Now Ani tries to post as the coin. NEAR rejects her. Her key was deleted in the same transaction, so the protocol, not a server, decides who speaks for the coin. |
 | 45.4–52.0s | Receipts: steps checked, npm run verify PASS lines, VERIFIED stamp, 60-day chart draws | No admin keys. Every step has a receipt, and one command checks every rule. |
-| 52.0–59.0s | Close: CTO, tagline, Built on NEAR · testnet · no admin keys · #NEARHackathon | CTO. The memecoin where anyone can take over. Built on NEAR. |
+| 52.0–59.0s | Close: $CTO, tagline, Built on NEAR · testnet · no admin keys · #NEARHackathon | CTO. The memecoin where anyone can take over. Built on NEAR. (Title card and caption: $CTO.) |
 
 ## Swap plan for the final submission (Sat Nov 14)
 Keep the script and timing. Re-record scenes 2–6 from the real testnet app at 1920x1080 and replace scenes/s2–s6. Scene 5 must show the real AccessKeyNotFound error from NEAR and real explorer links. Then remove the DESIGN PREVIEW tag.
 
 Film on the demo coin (`demo-cto.testnet`, no wallet), following the "Video" section of `scripts/deploy.md`. Scene 4's burn and supply figures will show the demo coin's real totals instead of 1,250,000 / 998,750,000; the voiceover stays the same.
 
+Ticker style: on-screen titles name the coin **$CTO** (the X post does too); amounts stay "1,150,000 CTO", as wallets show the on-chain symbol. The voiceover says "C-T-O".

@@ -1,11 +1,12 @@
-# CTO: the memecoin where anyone can take over
+# $CTO: the memecoin where anyone can take over
 
-**A NEAR testnet memecoin with one CEO seat. Anyone can take it by paying 1.4x what the last CEO paid. The old CEO is paid 1.15x to leave, 0.25x is burned, and NEAR itself locks the old CEO out of the coin's voice.**
+**$CTO is a NEAR testnet memecoin with one CEO seat. Anyone can take it by paying 1.4x what the last CEO paid. The old CEO is paid 1.15x to leave, 0.25x is burned, and NEAR itself locks the old CEO out of the coin's voice.**
 
 Fired, but paid.
 
 - **App:** <!-- app-url -->[ctotimes.xyz](https://ctotimes.xyz)<!-- /app-url -->
 - **Coins:** [`cto.testnet`](https://testnet.nearblocks.io/address/cto.testnet) (main, 7 days idle + 7 days decay) · [`demo-cto.testnet`](https://testnet.nearblocks.io/address/demo-cto.testnet) (demo, 2 + 3 minutes)
+- **Ticker:** $CTO. The on-chain symbol is `CTO` (demo coin: `CTOD`), so amounts read "1,400,000 CTO". Unrelated tokens on other chains also use $CTO; this one is only `cto.testnet`.
 - **Proof:** [CI runs all six test layers](https://github.com/cto-takeover/cto-memecoin/actions/workflows/ci.yml) · `npm run verify` (below)
 - NEAR Hackathon, Memecoins track. Testnet only · no sale · no admin keys · open source (MIT).
 

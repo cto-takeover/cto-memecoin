@@ -54,7 +54,7 @@ Follow `docs/video-script.md` (59 s, 7 scenes, same timing as the concept video)
 - [x] ~~README names the team's other project, if one is submitted~~ N/A: CTO is the only submission (decided Wed Nov 11)
 - [x] Live app URL works in a private window with no wallet (https://ctotimes.xyz, also https://cto-memecoin.vercel.app; e2e 17/17 against it)
 - [ ] 60-second video uploaded where the form asks
-- [ ] X post with #NEARHackathon, video attached
+- [ ] X post with #NEARHackathon, video attached (draft: `docs/x-post.md`)
 - [ ] Submission form sent
 
 ## Done when
