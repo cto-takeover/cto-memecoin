@@ -2,7 +2,11 @@
 // NEAR's errors come back unedited, and a signed transaction is never resent after
 // a network failure.
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { postRpc } from '../../src/lib/jsonrpc.js';
+import { RpcTimeout, SEND_TIMEOUT_MS, VIEW_TIMEOUT_MS, postRpc } from '../../src/lib/jsonrpc.js';
+
+/** A fetch that never answers, until its AbortSignal fires. */
+const hang = (_url: string, init?: RequestInit) =>
+  new Promise<Response>((_, reject) => init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError'))));
 
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 const NEAR_ERROR = { name: 'HANDLER_ERROR', cause: { name: 'INVALID_TRANSACTION', info: {} }, code: -32000, message: 'Server error', data: { TxExecutionError: { InvalidTxError: { InvalidAccessKeyError: { AccessKeyNotFound: { account_id: 'demo-cto.testnet', public_key: 'ed25519:x' } } } } } };
@@ -67,4 +71,31 @@ describe('postRpc', () => {
     expect((await postRpc([a, b], 'query', {})).error.code).toBe(-429);
     expect(fetch).toHaveBeenCalledTimes(4);
   }, 10_000);
+
+  it('times out a slow read and moves on to the fallback', async () => {
+    const [a, b] = urls();
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => (url === a ? hang(url, init) : json(200, { result: 3 })));
+    vi.stubGlobal('fetch', fetch);
+    expect(await postRpc([a, b], 'query', {}, 'cto', { timeoutMs: 50 })).toEqual({ result: 3 });
+    expect(fetch.mock.calls.map((c) => c[0])).toEqual([a, b]);
+  });
+
+  it('a timed-out send_tx throws RpcTimeout and is never resent', async () => {
+    const [a, b] = urls();
+    const fetch = vi.fn(hang);
+    vi.stubGlobal('fetch', fetch);
+    await expect(postRpc([a, b], 'send_tx', {}, 'cto', { timeoutMs: 50 })).rejects.toBeInstanceOf(RpcTimeout);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('defaults: 8 s for reads, 30 s for transactions; every request gets a signal', async () => {
+    expect([VIEW_TIMEOUT_MS, SEND_TIMEOUT_MS]).toEqual([8_000, 30_000]);
+    const [a, b] = urls();
+    const fetch = vi.fn(async (_url: string, init?: RequestInit) => {
+      expect(init?.signal).toBeInstanceOf(AbortSignal);
+      return json(200, { result: 4 });
+    });
+    vi.stubGlobal('fetch', fetch);
+    expect(await postRpc([a, b], 'block', {})).toEqual({ result: 4 });
+  });
 });

@@ -6,6 +6,6 @@
   "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }],
   "headers": [
     { "source": "/sim/(.*)", "headers": [{ "key": "cache-control", "value": "public, max-age=300" }] },
-    { "source": "/api/(.*)", "headers": [{ "key": "cache-control", "value": "no-store" }] }
+    { "source": "/api/demo/(take-seat|announce)", "headers": [{ "key": "cache-control", "value": "no-store" }] }
   ]
 }

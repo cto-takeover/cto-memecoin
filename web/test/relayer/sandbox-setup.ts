@@ -1,8 +1,10 @@
 // Global setup for the relayer tests: a local NEAR sandbox with the real
 // contract (../target/near/cto/cto.wasm) deployed as the demo coin, launched
 // with the demo numbers from constants.json, and its deployer key deleted.
+// CTO_WASM=../res/cto.wasm runs them against the committed release build instead
+// (for a machine without Rust; the contract on testnet is that build).
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import type { TestProject } from 'vitest/node';
 import { Account, KeyPair, actions } from 'near-api-js';
 import { DEFAULT_ACCOUNT_ID, DEFAULT_PRIVATE_KEY, Sandbox } from 'near-sandbox';
@@ -22,7 +24,7 @@ declare module 'vitest' {
 }
 
 const ROOT = join(import.meta.dirname, '../../..');
-const WASM = join(ROOT, 'target/near/cto/cto.wasm');
+const WASM = process.env.CTO_WASM ? resolve(process.env.CTO_WASM) : join(ROOT, 'target/near/cto/cto.wasm');
 const ONE_CTO = 10n ** 18n;
 const NEAR = 10n ** 24n;
 

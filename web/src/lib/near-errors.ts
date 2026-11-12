@@ -13,8 +13,19 @@ export interface NearError {
 
 export interface RelayerError {
   source: 'relayer';
-  type: 'BadRequest' | 'Forbidden' | 'RateLimited' | 'NotConfigured' | 'NeverCeo' | 'NoMatchingKey' | 'Internal';
+  type:
+    | 'BadRequest'
+    | 'Forbidden'
+    | 'RateLimited'
+    | 'PriceCap'
+    | 'LowFunds'
+    | 'NotConfigured'
+    | 'NeverCeo'
+    | 'NoMatchingKey'
+    | 'Internal';
   message: string;
+  /** Seconds until trying again can work (429 / 409 / 503 when known). Also sent as Retry-After. */
+  retryAfterS?: number;
 }
 
 export type ApiError = NearError | RelayerError;
@@ -62,8 +73,5 @@ export function fromFailure(failure: unknown): NearError {
   return { source: 'near', type: path.join('.'), message: leafText(leaf), raw: { Failure: failure } };
 }
 
-export const relayerError = (type: RelayerError['type'], message: string): RelayerError => ({
-  source: 'relayer',
-  type,
-  message,
-});
+export const relayerError = (type: RelayerError['type'], message: string, retryAfterS?: number): RelayerError =>
+  retryAfterS === undefined ? { source: 'relayer', type, message } : { source: 'relayer', type, message, retryAfterS };
