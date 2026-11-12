@@ -5,7 +5,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import constants from '../reference/constants.json' with { type: 'json' };
-import type { Page } from '@playwright/test';
+import { test, type Page } from '@playwright/test';
 import { postRpc } from '../web/src/lib/jsonrpc';
 
 export const S = {
@@ -92,6 +92,20 @@ const ONE = 10n ** 18n;
 /** Whole CTO with commas, rounded down: the app's `cto()`. */
 export const cto = (base: string | bigint) => (BigInt(base) / ONE).toLocaleString('en-US');
 
+/** The relayer's price cap: DEMO_PRICE_CAP_X (default 4) times the opening price. */
+export const PRICE_CAP = 4n * BigInt(constants.opening_price) * ONE;
+
+/**
+ * Wait until the demo price has decayed to `atMost` (up to ~3 min after a takeover),
+ * so back-to-back runs don't hit the relayer's price cap. Extends the test timeout.
+ */
+export async function waitForPrice(atMost: bigint = PRICE_CAP): Promise<void> {
+  while (BigInt((await seat()).current_price) > atMost) {
+    test.info().setTimeout(test.info().timeout + 10_000);
+    await sleep(10_000);
+  }
+}
+
 export type Who = 'ani' | 'budi';
 export const demoWho = (account: string | null): Who | undefined => (account === S.ani ? 'ani' : account === S.budi ? 'budi' : undefined);
 /** Whoever is not CEO takes the seat (ani if it is vacant). */
@@ -106,6 +120,12 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Wait until one more signing request (and, for takeovers, the 10 s gap) is allowed. */
 export async function budget(kind: 'take-seat' | 'announce'): Promise<void> {
+  if (kind === 'take-seat') {
+    // The relayer counts the gap from the last takeover's block time, which lands
+    // a few seconds after the ledger's send time below.
+    const [latest] = await history(1);
+    if (latest) await sleep(Math.max(0, Number(BigInt(latest.at_ns) / 1_000_000n) + 11_000 - Date.now()));
+  }
   for (;;) {
     const now = Date.now();
     const raw: { t: number; kind: string }[] = existsSync(LEDGER) ? JSON.parse(readFileSync(LEDGER, 'utf8')) : [];

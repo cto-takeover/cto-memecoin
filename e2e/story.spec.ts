@@ -1,7 +1,7 @@
 // E2E-1, 2, 3, 4 and 6: the judge's story with real clicks on the demo coin.
 // Each test reads the seat first and adapts (whoever is not CEO takes the seat).
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { announcements, balance, budget, cto, demoWho, history, S, seat, supply, taker, txStatus, type Face } from './chain';
+import { announcements, balance, budget, cto, demoWho, history, PRICE_CAP, S, seat, supply, taker, txStatus, waitForPrice, type Face } from './chain';
 
 const PARTS = ['bg', 'eyes', 'mouth', 'extra'] as const;
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -31,6 +31,7 @@ async function affordable(account: string, price: string) {
 
 /** E2E-1 (and E2E-6 with reduced motion): Front page → desk → takeover → Front page. */
 async function takeover(page: Page, during?: (dialog: Locator) => Promise<void>) {
+  await waitForPrice();
   const before = await seat();
   const supplyBefore = await supply();
   const { account } = taker(before);
@@ -130,6 +131,8 @@ test('E2E-3 the CEO posts as the coin', async ({ page }) => {
 });
 
 test('E2E-4 price moved: the second click loses and pays nothing', async ({ browser }) => {
+  // A's takeover raises the price 1.4x; B must still be under the cap to reach the contract.
+  await waitForPrice((PRICE_CAP * 5n) / 7n);
   const before = await seat();
   const { account } = taker(before);
   await affordable(account, before.current_price);
