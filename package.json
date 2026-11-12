@@ -5,7 +5,7 @@
   "scripts": {
     "build:contract": "cargo near build non-reproducible-wasm --manifest-path contract/Cargo.toml",
     "gen:reference": "node scripts/gen-reference.mjs",
-    "check:reference": "node scripts/gen-reference.mjs --check",
+    "check:reference": "node scripts/gen-reference.mjs --check && node scripts/sim-chart.mjs --check",
     "test:relayer": "npm run check:reference && node scripts/deploy.mjs --check && python3 scripts/gen-faces.py --check && npm run build:contract && npm --prefix web run typecheck && npm --prefix web run test:relayer",
     "gen:faces": "python3 scripts/gen-faces.py",
     "dev:chain": "npm run build:contract && node scripts/dev-chain.mjs",

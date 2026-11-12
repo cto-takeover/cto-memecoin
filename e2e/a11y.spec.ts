@@ -1,6 +1,8 @@
-// E2E-8: axe-core on the four routes, desktop and phone. No serious or critical issues.
+// E2E-8: axe-core on the four routes, desktop and phone. No serious or critical
+// issues (WCAG 2.2 AA, so target-size too), and every button-like target ≥ 44 px.
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { smallTargets } from './chain';
 
 const ROUTES = ['/', '/takeover', '/press', '/receipts'];
 
@@ -14,9 +16,10 @@ for (const [label, viewport] of [['desktop', { width: 1440, height: 900 }], ['ph
         await page.waitForLoadState('networkidle').catch(() => undefined);
         // Let entrance animations finish: axe would measure a half-faded card.
         await page.waitForFunction(() => document.getAnimations().every((a) => a.effect?.getTiming().iterations === Infinity || a.playState === 'finished'), null, { timeout: 15_000 });
-        const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+        const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
         const bad = violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
         expect(bad.map((v) => `${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`)).toEqual([]);
+        expect(await smallTargets(page), 'targets smaller than 44 px').toEqual([]);
       });
     }
   });

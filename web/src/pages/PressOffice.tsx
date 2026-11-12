@@ -9,6 +9,7 @@ import { ActorPicker } from '../components/ActorPicker';
 import { CountUp, FaceImg, Loading, ReadError, TxChip, useAsync } from '../components/bits';
 import { demoAnnounce } from '../lib/demo';
 import { ago, cto, shortKey } from '../lib/format';
+import { recallTakeover } from '../lib/lastTakeover';
 import type { ApiError } from '../lib/near-errors';
 import { view, viewAccessKeyList } from '../lib/rpc';
 import { announcementTx, saveTx, takeoverTx } from '../lib/txlinks';
@@ -19,6 +20,69 @@ type Attempt = { kind: 'idle' } | { kind: 'sending' } | { kind: 'done'; error?: 
 
 const demoWho = (account: string | null | undefined): Who | undefined =>
   account === DEMO_ACCOUNTS.ani ? 'ani' : account === DEMO_ACCOUNTS.budi ? 'budi' : undefined;
+
+/** A relayer error as the panel prints it, with its wait when it has one. NEAR's errors are never passed here. */
+const relayerText = (e: ApiError) => (e.source === 'relayer' && e.retryAfterS !== undefined ? `${e.message} (try again in ${e.retryAfterS} s)` : e.message);
+
+/** Takeover `index` read on its own. get_history counts back from the newest. */
+async function fetchTakeover(contractId: string, index: number, len: number): Promise<Takeover | undefined> {
+  for (let tries = 0; tries < 3; tries++) {
+    if (index >= len) return undefined;
+    const [t] = await view<Takeover[]>(contractId, 'get_history', { from_index: len - 1 - index, limit: 1 });
+    if (!t || t.index === index) return t;
+    len += t.index - index; // newer takeovers landed since the last poll
+  }
+  return undefined;
+}
+
+/** Takeovers by index: from the polled page, else read once (entries never change). */
+function useTakeoverEntries(contractId: string, history: Takeover[]) {
+  const [fetched, setFetched] = useState<ReadonlyMap<string, Takeover>>(() => new Map());
+  const pending = useRef(new Set<string>());
+  const len = history.length ? history[0].index + 1 : 0;
+  const get = (i: number) => history.find((t) => t.index === i) ?? fetched.get(`${contractId}:${i}`);
+  const need = (indices: number[]) => {
+    for (const i of indices) {
+      const k = `${contractId}:${i}`;
+      if (i < 0 || i >= len || get(i) || pending.current.has(k)) continue;
+      pending.current.add(k);
+      fetchTakeover(contractId, i, len)
+        .then((t) => {
+          if (t) setFetched((m) => new Map(m).set(k, t));
+        })
+        .catch(() => undefined) // read again on the next poll
+        .finally(() => pending.current.delete(k));
+    }
+  };
+  return { get, need };
+}
+
+type Featured = { t?: Takeover; source: 'mine' | 'pinned' | 'demo' | 'latest'; loading?: boolean };
+
+/**
+ * The takeover the wow moment is about: (a) the one this tab made, if it pushed
+ * someone out; else (b) the one the visitor already tried on this page; else (c) on
+ * the demo coin, the newest that pushed out ani or budi; else (d) the latest.
+ */
+function pickFeatured(history: Takeover[], get: (i: number) => Takeover | undefined, mine: number | undefined, pinned: number | undefined, coinKey: 'demo' | 'main'): Featured {
+  const latest = history[0];
+  if (!latest) return { source: 'latest' };
+  const usable = (t?: Takeover): t is Takeover => !!t && t.index >= 1 && !!t.previous_ceo;
+  if (mine !== undefined && mine >= 1 && mine <= latest.index) {
+    const t = get(mine);
+    if (!t) return { source: 'mine', loading: true };
+    if (usable(t)) return { t, source: 'mine' };
+  }
+  if (pinned !== undefined) {
+    const t = get(pinned);
+    if (usable(t)) return { t, source: 'pinned' };
+  }
+  if (coinKey === 'demo') {
+    const t = history.find((h) => h.index >= 1 && demoWho(h.previous_ceo) !== undefined);
+    if (t) return { t, source: 'demo' };
+  }
+  return { t: latest, source: 'latest' };
+}
 
 /** Fills a line's slots with live numbers, the way the contract will. */
 function fill(line: string, seat: SeatView, burned: string) {
@@ -34,20 +98,39 @@ export function PressOffice() {
   const keys = usePoll(() => viewAccessKeyList(contractId), 3000, [contractId]);
   const now = useNow(5000);
 
+  // The wow moment stays on one takeover: polling never swaps or remounts it.
+  const history = state?.history ?? [];
+  const entries = useTakeoverEntries(contractId, history);
+  const mine = recallTakeover(contractId);
+  const [pinned, setPinned] = useState<number>();
+  const featured = pickFeatured(history, entries.get, mine, pinned, coinKey);
+  const wanted = [mine, mine === undefined ? undefined : mine - 1, featured.t ? featured.t.index - 1 : undefined].filter((i): i is number => i !== undefined && i >= 0);
+  useEffect(() => entries.need(wanted), [contractId, wanted.join(','), state?.readAt]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!state) return error ? <ReadError error={error} /> : <Loading />;
-  const { seat, history, announcements, burned } = state;
+  const { seat, announcements, burned } = state;
   const latest = history[0];
   const previous = history[1];
   const liveKeys = keys.data?.map((k) => k.public_key);
+  const shown = featured.t?.previous_ceo ? featured.t : undefined;
+  const shownPrev = shown ? entries.get(shown.index - 1) : undefined;
+  const newer = shown && latest ? latest.index - shown.index : 0;
 
   return (
     <>
       <Banner latest={latest} previous={previous} seat={seat} contractId={contractId} now={now} />
 
-      {latest?.previous_ceo && previous ? (
-        <section className="g2">
-          <ExCeoPanel key={latest.index} latest={latest} previous={previous} contractId={contractId} coinKey={coinKey} />
-          <PayoutCard latest={latest} previous={previous} contractId={contractId} />
+      {shown && shownPrev ? (
+        <section style={{ display: 'grid', gap: 10 }}>
+          {newer > 0 && (
+            <p className="mono" style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>
+              {newer} newer takeover{newer === 1 ? '' : 's'} since {featured.source === 'mine' ? 'yours' : 'this one'}
+            </p>
+          )}
+          <div className="g2">
+            <ExCeoPanel key={shown.index} latest={shown} previous={shownPrev} contractId={contractId} coinKey={coinKey} onTry={() => setPinned(shown.index)} />
+            <PayoutCard key={shown.index} latest={shown} previous={shownPrev} contractId={contractId} />
+          </div>
         </section>
       ) : null}
 
@@ -159,7 +242,21 @@ function Banner({ latest, previous, seat, contractId, now }: { latest?: Takeover
 }
 
 /** The wow moment: the ex-CEO tries to post with the key NEAR deleted. */
-function ExCeoPanel({ latest, previous, contractId, coinKey }: { latest: Takeover; previous: Takeover; contractId: string; coinKey: 'demo' | 'main' }) {
+function ExCeoPanel({
+  latest,
+  previous,
+  contractId,
+  coinKey,
+  onTry,
+}: {
+  /** The featured takeover (not necessarily the newest one). */
+  latest: Takeover;
+  /** The takeover before it: its voice key is the one NEAR deleted. */
+  previous: Takeover;
+  contractId: string;
+  coinKey: 'demo' | 'main';
+  onTry: () => void;
+}) {
   const exCeo = latest.previous_ceo!;
   const reduced = useReducedMotion();
   const [attempt, setAttempt] = useState<Attempt>({ kind: 'idle' });
@@ -180,8 +277,10 @@ function ExCeoPanel({ latest, previous, contractId, coinKey }: { latest: Takeove
 
   const tryPost = async () => {
     setAttempt({ kind: 'sending' });
+    onTry();
     if (who) {
-      const r = await demoAnnounce(who, line);
+      // Pinned to the ex-CEO's takeover, so the key is the one this takeover deleted.
+      const r = await demoAnnounce(who, line, previous.index);
       setAttempt(r.ok ? { kind: 'done', txHash: r.txHash } : { kind: 'done', error: r.error, txHash: r.txHash });
     } else if (stored) {
       const r = await postAsCoin(contractId, stored.private_key, line);
@@ -233,9 +332,14 @@ function ExCeoPanel({ latest, previous, contractId, coinKey }: { latest: Takeove
                   </p>
                 )}
                 <pre className="mono" style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', margin: 0, fontSize: 12 }}>
-                  {attempt.error.source === 'near' ? JSON.stringify(attempt.error.raw, null, 2) : attempt.error.message}
+                  {attempt.error.source === 'near' ? JSON.stringify(attempt.error.raw, null, 2) : relayerText(attempt.error)}
                 </pre>
               </div>
+              {attempt.txHash && (
+                <p style={{ margin: '0 0 8px' }}>
+                  <TxChip hash={attempt.txHash} account={contractId} label="check on the explorer" />
+                </p>
+              )}
               {rejected && (
                 <p className="a-rise" style={{ margin: 0, fontWeight: 700, animationDelay: '.4s' }}>
                   Locked out by the protocol, not by us.
@@ -458,7 +562,7 @@ function Composer({
             <div role="status" style={{ marginTop: 12 }}>
               {state.error ? (
                 <pre className="mono" style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', background: 'var(--color-reject)', padding: 12, margin: 0, fontSize: 13, border: '2px solid var(--color-ink)' }}>
-                  {state.error.source === 'near' ? JSON.stringify(state.error.raw, null, 2) : state.error.message}
+                  {state.error.source === 'near' ? JSON.stringify(state.error.raw, null, 2) : relayerText(state.error)}
                 </pre>
               ) : (
                 <p className="mono" style={{ margin: 0 }}>

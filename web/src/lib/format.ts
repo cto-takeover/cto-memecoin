@@ -90,3 +90,7 @@ export function durationWords(s: number): string {
   if (s % 60 === 0) return unit(s / 60, 'minute');
   return unit(s, 'second');
 }
+
+/** "Wed 18 Nov, 14:05 GMT+7": a moment in the reader's own time zone. */
+export const dateTime = (d: Date) =>
+  d.toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });

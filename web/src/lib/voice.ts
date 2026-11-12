@@ -6,6 +6,8 @@ import { accessKey, finalBlock, sendTx } from './rpc';
 import { fromFailure, fromRpcError, type NearError } from './near-errors';
 
 const storageKey = (contractId: string, accountId: string) => `cto:voice:${contractId}:${accountId}`;
+/** A key made for a take_seat the wallet has not confirmed yet (spec 2, voice key step 2). */
+const pendingKey = (contractId: string, accountId: string) => `cto:voice-pending:${contractId}:${accountId}`;
 
 export interface StoredVoiceKey {
   contract_id: string;
@@ -16,27 +18,69 @@ export interface StoredVoiceKey {
 
 export const newVoiceKey = () => KeyPair.fromRandom('ed25519');
 
-export function saveVoiceKey(contractId: string, accountId: string, kp: KeyPair): StoredVoiceKey {
-  const record: StoredVoiceKey = {
-    contract_id: contractId,
-    ceo: accountId,
-    public_key: kp.getPublicKey().toString(),
-    private_key: kp.toString(),
-  };
+const toRecord = (contractId: string, accountId: string, kp: KeyPair): StoredVoiceKey => ({
+  contract_id: contractId,
+  ceo: accountId,
+  public_key: kp.getPublicKey().toString(),
+  private_key: kp.toString(),
+});
+
+function write(key: string, record: StoredVoiceKey) {
   try {
-    localStorage.setItem(storageKey(contractId, accountId), JSON.stringify(record));
+    localStorage.setItem(key, JSON.stringify(record));
   } catch {
     // private mode: the download is the only copy
   }
+}
+
+function read(key: string): StoredVoiceKey | undefined {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as StoredVoiceKey) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Saves a key that is on chain (or imported from a key file) as this account's voice key. */
+export function saveVoiceKey(contractId: string, accountId: string, kp: KeyPair): StoredVoiceKey {
+  const record = toRecord(contractId, accountId, kp);
+  write(storageKey(contractId, accountId), record);
   return record;
 }
 
 export function loadVoiceKey(contractId: string, accountId: string): StoredVoiceKey | undefined {
+  return read(storageKey(contractId, accountId));
+}
+
+/**
+ * Saves a new key before take_seat is signed, in a separate slot: until the
+ * takeover succeeds, the account's current voice key (an ex-CEO's, for "try
+ * posting") must stay where it is.
+ */
+export function savePendingVoiceKey(contractId: string, accountId: string, kp: KeyPair): StoredVoiceKey {
+  const record = toRecord(contractId, accountId, kp);
+  write(pendingKey(contractId, accountId), record);
+  return record;
+}
+
+export function loadPendingVoiceKey(contractId: string, accountId: string): StoredVoiceKey | undefined {
+  return read(pendingKey(contractId, accountId));
+}
+
+/** take_seat succeeded with this key: it becomes the account's voice key. */
+export function promoteVoiceKey(record: StoredVoiceKey): StoredVoiceKey {
+  write(storageKey(record.contract_id, record.ceo), record);
+  discardPendingVoiceKey(record.contract_id, record.ceo);
+  return record;
+}
+
+/** take_seat failed or was cancelled: the key was never installed. */
+export function discardPendingVoiceKey(contractId: string, accountId: string) {
   try {
-    const raw = localStorage.getItem(storageKey(contractId, accountId));
-    return raw ? (JSON.parse(raw) as StoredVoiceKey) : undefined;
+    localStorage.removeItem(pendingKey(contractId, accountId));
   } catch {
-    return undefined;
+    // nothing stored
   }
 }
 

@@ -42,8 +42,8 @@ Supply in ink on the left axis, seat price in red on the right axis, a dot per t
 ## Done when
 
 - [x] M9: four CSVs in `web/public/sim/`, and `--check` passes (Nov 10: `sim check: ok`; busy 13 takeovers, burned 30,952,085, supply 969,047,915)
-- [ ] The Receipts chart reads the CSVs, no hard-coded points
-- [ ] The README shows the busy chart as an image with the same numbers
+- [x] The Receipts chart reads the CSVs, no hard-coded points (`web/src/components/SimChart.tsx` fetches `/sim/{tab}.csv`)
+- [x] The README shows the busy chart as an image with the same numbers (`docs/sim-busy.svg`, drawn from `busy.csv` by `scripts/sim-chart.mjs`; `npm run check:reference` fails if it is stale)
 
 ## Build notes (added Nov 10 while implementing)
 

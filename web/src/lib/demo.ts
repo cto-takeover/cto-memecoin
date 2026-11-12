@@ -41,5 +41,13 @@ export const demoState = () => call<DemoState>('state');
 export const demoTakeSeat = (who: Who, face: Face, maxPrice: string) =>
   call<{ txHash: string; takeoverIndex?: number }>('take-seat', post({ as: who, face, maxPrice }));
 
-export const demoAnnounce = (who: Who, line: number) =>
-  call<{ txHash: string; announcementIndex?: number }>('announce', post({ as: who, line }));
+/**
+ * Posts `line` with the voice key `who` installed at takeover `takeoverIndex`
+ * (default: their latest takeover). Pinning the index keeps the ex-CEO's attempt
+ * on the key NEAR deleted, even if they have taken the seat again since.
+ */
+export const demoAnnounce = (who: Who, line: number, takeoverIndex?: number) =>
+  call<{ txHash: string; announcementIndex?: number }>(
+    'announce',
+    post(takeoverIndex === undefined ? { as: who, line } : { as: who, line, takeoverIndex }),
+  );

@@ -7,6 +7,7 @@ import { SeatClock } from '../components/SeatClock';
 import { PhoneBar } from '../components/PhoneBar';
 import { faceId, faceWords } from '../lib/faces';
 import { ago, cto, duration, nsToDate, shortDate } from '../lib/format';
+import { view } from '../lib/rpc';
 import { announcementTx, deployTx, takeoverTx } from '../lib/txlinks';
 import type { Announcement, Takeover } from '../lib/types';
 
@@ -116,7 +117,8 @@ export function FrontPage() {
             {takeovers.toLocaleString('en-US')}
           </p>
           <p className="muted" style={{ margin: '6px 0 0', fontSize: 13 }}>
-            since launch{history.length ? ` · first ${shortDate(nsToDate(history[history.length - 1].at_ns))}` : ''}
+            since launch
+            {takeovers > 0 && <FirstTakeover contractId={contractId} loaded={history} count={takeovers} />}
           </p>
         </div>
       </section>
@@ -165,6 +167,21 @@ export function FrontPage() {
       <div className="has-phonebar" aria-hidden="true" />
     </>
   );
+}
+
+/**
+ * " · first {date}": the oldest takeover. get_history pages newest first, so the
+ * oldest is at from_index = count - 1; the 8 loaded entries only hold it while
+ * there are 8 or fewer takeovers.
+ */
+function FirstTakeover({ contractId, loaded, count }: { contractId: string; loaded: Takeover[]; count: number }) {
+  const inPage = loaded.find((t) => t.index === 0);
+  const fetched = useAsync(
+    () => (inPage ? Promise.resolve(undefined) : view<Takeover[]>(contractId, 'get_history', { from_index: count - 1, limit: 1 }).then((r) => r.find((t) => t.index === 0))),
+    [contractId, !!inPage],
+  );
+  const first = inPage ?? fetched;
+  return first ? <> · first {shortDate(nsToDate(first.at_ns))}</> : null;
 }
 
 function PressRelease({ a, contractId, delay, now }: { a: Announcement; contractId: string; delay: number; now: number }) {

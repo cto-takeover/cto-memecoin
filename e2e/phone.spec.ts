@@ -1,5 +1,7 @@
-// E2E-5: phone 375×812. Sticky TAKE OVER bar, no sideways scroll, buttons ≥ 44 px.
+// E2E-5: phone 375×812. Sticky TAKE OVER bar, no sideways scroll, targets ≥ 44 px
+// (buttons, nav pills, the coin switch and tx chips).
 import { expect, test, type Page } from '@playwright/test';
+import { smallTargets } from './chain';
 
 test.use({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
 
@@ -15,14 +17,8 @@ async function phoneChecks(page: Page, barAction: string) {
   const width = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, view: window.innerWidth }));
   expect(width.scroll, 'no sideways scroll').toBeLessThanOrEqual(width.view);
 
-  const small = await page.evaluate(() =>
-    [...document.querySelectorAll<HTMLElement>('button, a.btn, a.ghost, [role="radio"], [role="tab"]')]
-      .filter((el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden')
-      .map((el) => ({ el, r: el.getBoundingClientRect() }))
-      .filter(({ r }) => r.height < 44 || r.width < 44)
-      .map(({ el, r }) => `${el.tagName.toLowerCase()} "${(el.getAttribute('aria-label') ?? el.textContent ?? '').trim().slice(0, 40)}" ${Math.round(r.width)}×${Math.round(r.height)}`),
-  );
-  expect(small, 'buttons smaller than 44 px').toEqual([]);
+  const small = await smallTargets(page);
+  expect(small, 'targets smaller than 44 px').toEqual([]);
 }
 
 test('E2E-5 phone: front page', async ({ page }) => {

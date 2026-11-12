@@ -1,30 +1,43 @@
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { DEMO_ACCOUNTS, FACE_COUNT, FAUCET_WHOLE, TAKE_SEAT_NEAR } from '../config';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { Link, useLocation } from 'react-router';
+import { DEMO_ACCOUNTS, FACE_COUNT, TAKE_SEAT_NEAR } from '../config';
 import { useActor, useActorCtx } from '../hooks/actor';
 import { useCoinData } from '../hooks/coinData';
-import { pause, useCoinKey, usePoll, useReducedMotion } from '../hooks/hooks';
+import { coinPath, pause, useCoinKey, usePoll, useReducedMotion } from '../hooks/hooks';
 import { ActorPicker } from '../components/ActorPicker';
 import { FaceImg, Loading, ReadError } from '../components/bits';
 import { PhoneBar } from '../components/PhoneBar';
 import { TakeoverSequence, type SequenceData } from '../components/TakeoverSequence';
 import { demoTakeSeat } from '../lib/demo';
 import { PART_KEYS, PART_NAMES, faceId, faceWords, type Face, type PartKey } from '../lib/faces';
-import { cto, ratio } from '../lib/format';
+import { cto, dateTime, nsToDate, ratio, times } from '../lib/format';
+import { rememberTakeover } from '../lib/lastTakeover';
 import type { ApiError } from '../lib/near-errors';
 import { view } from '../lib/rpc';
 import { saveTx } from '../lib/txlinks';
-import type { FaucetStatus, SeatView, Takeover } from '../lib/types';
-import { downloadVoiceKey, eventData, newVoiceKey, saveVoiceKey } from '../lib/voice';
-import { txOutcome, useWallet, DEPOSITS } from '../lib/wallet';
+import type { ConfigView, FaucetStatus, SeatView, Takeover } from '../lib/types';
+import {
+  discardPendingVoiceKey,
+  downloadVoiceKey,
+  eventData,
+  loadPendingVoiceKey,
+  newVoiceKey,
+  promoteVoiceKey,
+  savePendingVoiceKey,
+  type StoredVoiceKey,
+} from '../lib/voice';
+import { txOutcome, useWallet, DEPOSITS, type CallResult } from '../lib/wallet';
 
 const TAB_LABELS: Record<PartKey, string> = { bg: 'BACKGROUND', eyes: 'EYES', mouth: 'MOUTH', extra: 'EXTRA' };
 const randomPart = () => crypto.getRandomValues(new Uint8Array(1))[0] % 8;
 const randomFace = (): Face => ({ bg: randomPart(), eyes: randomPart(), mouth: randomPart(), extra: randomPart() });
 
+type DeskError = ApiError | { source: 'wallet'; type: string; message: string };
+
 type Status =
   | { kind: 'idle' }
   | { kind: 'sending'; quote: Quote }
-  | { kind: 'error'; error: ApiError | { source: 'wallet'; type: string; message: string }; txHash?: string }
+  | { kind: 'error'; error: DeskError; txHash?: string; /** ms; the relayer said when to try again */ retryAt?: number }
   | { kind: 'info'; message: string };
 
 interface Quote {
@@ -34,15 +47,24 @@ interface Quote {
   ceo: string | null;
 }
 
+type Before = { seat: SeatView; burned: string };
+
+/** An error as sent, plus the relayer's retryAfterS (rate limit, price cap) as a deadline. */
+function errorStatus(error: DeskError, txHash?: string): Status {
+  const after = 'retryAfterS' in error && typeof error.retryAfterS === 'number' ? error.retryAfterS : undefined;
+  return { kind: 'error', error, txHash, retryAt: after !== undefined ? Date.now() + after * 1000 : undefined };
+}
+
 const PENDING = 'cto:pending';
 
 export function TakeoverDesk() {
   const { state, error, config, contractId, refresh } = useCoinData();
   const coinKey = useCoinKey();
   const actor = useActor(coinKey, state?.seat.ceo);
-  const { mode } = useActorCtx();
+  const { mode, setMode } = useActorCtx();
   const wallet = useWallet();
   const reduced = useReducedMotion();
+  const { pathname } = useLocation();
 
   const [face, setFace] = useState<Face>(randomFace);
   const [tab, setTab] = useState<PartKey>('bg');
@@ -66,54 +88,62 @@ export function TakeoverDesk() {
     [contractId, actor.mode === 'wallet' ? actor.accountId : ''],
   );
 
+  const claimedMessage = async (account: string) => {
+    try {
+      const f = await view<FaucetStatus>(contractId, 'faucet_status', { account_id: account });
+      return `Claimed ${cto(f.amount)} CTO.`;
+    } catch {
+      return 'Claimed.';
+    }
+  };
+
   // Back from a redirecting wallet (MyNearWallet): finish what was pending.
   useEffect(() => {
     const url = new URL(window.location.href);
     const hashes = url.searchParams.get('transactionHashes');
     const errorCode = url.searchParams.get('errorCode');
+    const errorMessage = url.searchParams.get('errorMessage');
     const pendingRaw = sessionStorage.getItem(PENDING);
     if (!pendingRaw || (!hashes && !errorCode)) return;
     sessionStorage.removeItem(PENDING);
     for (const p of ['transactionHashes', 'errorCode', 'errorMessage', 'account_id', 'public_key', 'all_keys']) url.searchParams.delete(p);
     window.history.replaceState(null, '', url.toString());
-    const pending = JSON.parse(pendingRaw);
+    const pending = JSON.parse(pendingRaw) as { kind: 'claim_faucet' | 'take_seat'; account: string; contractId?: string; before?: Before };
+    const voiceContract = pending.contractId ?? contractId;
     if (errorCode) {
-      setStatus({ kind: 'error', error: { source: 'wallet', type: errorCode, message: url.searchParams.get('errorMessage') ?? 'The wallet did not send the transaction.' } });
+      if (pending.kind === 'take_seat') discardPendingVoiceKey(voiceContract, pending.account);
+      setStatus(errorStatus({ source: 'wallet', type: errorCode, message: errorMessage ?? 'The wallet did not send the transaction.' }));
       return;
     }
     void (async () => {
       const hash = hashes!.split(',').at(-1)!;
       const outcome = await txOutcome(hash, pending.account);
       if (pending.kind === 'claim_faucet') {
-        setStatus({ kind: 'info', message: `Claimed ${FAUCET_WHOLE} CTO.` });
+        if (outcome.ok === false) setStatus(errorStatus(outcome.error, outcome.txHash));
+        else setStatus({ kind: 'info', message: await claimedMessage(pending.account) });
         void balances.refresh();
         void faucet.refresh();
         return;
       }
-      await finishTakeover(outcome, pending.before, pending.account);
+      await finishTakeover(outcome, pending.before!, pending.account, loadPendingVoiceKey(voiceContract, pending.account), voiceContract);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const finishTakeover = useCallback(
-    async (
-      outcome: { ok: true; txHash: string; logs: string[] } | { ok: false; error: any; txHash?: string } | { ok: 'redirect' },
-      before: { seat: SeatView; burned: string },
-      accountId: string,
-    ) => {
-      if (outcome.ok === 'redirect') return;
-      if (outcome.ok === false) {
-        setStatus({ kind: 'error', error: outcome.error, txHash: outcome.txHash });
-        return;
-      }
-      const index: number | undefined = eventData(outcome.logs, 'seat_taken')?.takeover_index;
-      await showSequence(outcome.txHash, index, before, accountId);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [contractId],
-  );
+  /** A wallet take_seat came back (popup or redirect): promote or discard the pending voice key, then play the sequence. */
+  async function finishTakeover(outcome: CallResult, before: Before, accountId: string, voice: StoredVoiceKey | undefined, voiceContract: string) {
+    if (outcome.ok === 'redirect') return;
+    if (outcome.ok === false) {
+      discardPendingVoiceKey(voiceContract, accountId);
+      setStatus(errorStatus(outcome.error, outcome.txHash));
+      return;
+    }
+    const index: number | undefined = eventData(outcome.logs, 'seat_taken')?.takeover_index;
+    await showSequence(outcome.txHash, index, before, accountId, voice);
+  }
 
-  async function showSequence(txHash: string, index: number | undefined, before: { seat: SeatView; burned: string }, accountId: string, withKey?: () => void) {
+  async function showSequence(txHash: string, index: number | undefined, before: Before, accountId: string, voice?: StoredVoiceKey) {
+    if (index !== undefined) rememberTakeover(contractId, index);
     // The takeover already succeeded; a failed read (rate limit, lagging node) must
     // not lose the sequence, so read the history up to 4 times.
     let t: Takeover | undefined;
@@ -122,10 +152,17 @@ export function TakeoverDesk() {
       if (i) await new Promise((r) => setTimeout(r, 1000 * i));
       try {
         const recent = await view<Takeover[]>(contractId, 'get_history', { from_index: 0, limit: 10 });
-        t = recent.find((x) => (index !== undefined ? x.index === index : x.ceo === accountId));
+        t = recent.find((x) => (index !== undefined ? x.index === index : voice ? x.voice_key === voice.public_key : x.ceo === accountId));
       } catch (e) {
         readError = e;
       }
+    }
+    // Wallet mode: the new key is this account's voice key only once NEAR has it.
+    // Confirmed by the seat_taken event, or by the history entry carrying the key.
+    let onDownloadKey: (() => void) | undefined;
+    if (voice && (index !== undefined || t?.voice_key === voice.public_key)) {
+      const record = promoteVoiceKey(voice);
+      onDownloadKey = () => downloadVoiceKey(record);
     }
     const fresh = await refresh();
     if (!t && readError) {
@@ -133,7 +170,10 @@ export function TakeoverDesk() {
       void balances.refresh();
       return;
     }
-    if (t) saveTx(contractId, `takeover:${t.index}`, txHash);
+    if (t) {
+      saveTx(contractId, `takeover:${t.index}`, txHash);
+      rememberTakeover(contractId, t.index);
+    }
     setStatus({ kind: 'idle' });
     void balances.refresh();
     if (!t) return;
@@ -144,7 +184,7 @@ export function TakeoverDesk() {
       burnedTotal: fresh?.burned ?? (BigInt(before.burned) + BigInt(t.burned)).toString(),
       txHash,
       contractId,
-      onDownloadKey: withKey,
+      onDownloadKey,
     });
   }
 
@@ -157,7 +197,9 @@ export function TakeoverDesk() {
   const isCeo = actorId !== null && actorId === seat.ceo;
   const short = balance !== undefined && BigInt(balance) < BigInt(quote.price);
   const sending = status.kind === 'sending';
-  const takeRatio = config ? `${+ratio(config.takeover_ratio).toFixed(2)}x` : '1.4x';
+  // No number until get_config answers: the ratio is the chain's, never a guess.
+  const takeRatio = config ? times(ratio(config.takeover_ratio)) : undefined;
+  const faucetEmpty = faucet.data !== undefined && !faucet.data.claimed && BigInt(faucet.data.pool_left) < BigInt(faucet.data.amount);
 
   const shuffle = async () => {
     if (shuffling) return;
@@ -187,30 +229,29 @@ export function TakeoverDesk() {
     setStatus({ kind: 'sending', quote: frozen });
     if (actor.mode === 'demo') {
       const r = await demoTakeSeat(actor.who, face, frozen.price);
-      if (!r.ok) return setStatus({ kind: 'error', error: r.error, txHash: r.txHash });
+      if (!r.ok) return setStatus(errorStatus(r.error, r.txHash));
       await showSequence(r.txHash, r.takeoverIndex, before, actor.accountId);
       return;
     }
-    const kp = newVoiceKey();
-    const record = saveVoiceKey(contractId, actor.accountId, kp);
-    sessionStorage.setItem(PENDING, JSON.stringify({ kind: 'take_seat', account: actor.accountId, before }));
+    // The new key waits in a pending slot: the account's current voice key (an
+    // ex-CEO's "try posting") stays put until take_seat succeeds.
+    const record = savePendingVoiceKey(contractId, actor.accountId, newVoiceKey());
+    sessionStorage.setItem(PENDING, JSON.stringify({ kind: 'take_seat', account: actor.accountId, contractId, before }));
     const r = await wallet.call(contractId, 'take_seat', { face, new_ceo_key: record.public_key, max_price: frozen.price }, DEPOSITS.takeSeat);
     if (r.ok === 'redirect') return;
     sessionStorage.removeItem(PENDING);
-    if (r.ok === false) return setStatus({ kind: 'error', error: r.error, txHash: r.txHash });
-    const index: number | undefined = eventData(r.logs, 'seat_taken')?.takeover_index;
-    await showSequence(r.txHash, index, before, actor.accountId, () => downloadVoiceKey(record));
+    await finishTakeover(r, before, actor.accountId, record, contractId);
   };
 
   const claim = async () => {
     if (actor.mode !== 'wallet') return;
     setStatus({ kind: 'info', message: 'Waiting for the wallet…' });
-    sessionStorage.setItem(PENDING, JSON.stringify({ kind: 'claim_faucet', account: actor.accountId }));
+    sessionStorage.setItem(PENDING, JSON.stringify({ kind: 'claim_faucet', account: actor.accountId, contractId }));
     const r = await wallet.call(contractId, 'claim_faucet', {}, DEPOSITS.storage, 30);
     if (r.ok === 'redirect') return;
     sessionStorage.removeItem(PENDING);
-    if (r.ok === false) return setStatus({ kind: 'error', error: r.error, txHash: r.txHash });
-    setStatus({ kind: 'info', message: `Claimed ${FAUCET_WHOLE} CTO.` });
+    if (r.ok === false) return setStatus(errorStatus(r.error, r.txHash));
+    setStatus({ kind: 'info', message: await claimedMessage(actor.accountId) });
     void balances.refresh();
     void faucet.refresh();
   };
@@ -226,7 +267,9 @@ export function TakeoverDesk() {
             {seat.vacant ? 'THE SEAT IS OPEN' : 'HOSTILE TAKEOVER'}
           </h1>
           <p style={{ margin: '8px 0 0', fontSize: 18 }}>
-            {seat.vacant ? "Build the coin's first face, pay the opening price, and the seat is yours." : `Build the coin's next face, pay ${takeRatio}, and the seat is yours.`}
+            {seat.vacant
+              ? "Build the coin's first face, pay the opening price, and the seat is yours."
+              : `Build the coin's next face, pay ${takeRatio ?? 'the takeover price'}, and the seat is yours.`}
           </p>
         </div>
         {!seat.vacant && (
@@ -247,7 +290,7 @@ export function TakeoverDesk() {
       </section>
 
       <section className="g2">
-        <div style={{ position: 'relative', maxWidth: 440, justifySelf: 'center', width: '100%' }}>
+        <div style={{ position: 'relative', maxWidth: 440, justifySelf: 'center', alignSelf: 'start', width: '100%' }}>
           <div className={`card${shuffling ? ' a-shuffle' : ''}`} style={{ padding: 14 }}>
             <FaceImg face={face} size={400} label={`Live preview of the coin face: ${faceWords(face)}`} />
             <div className="rrow mono" style={{ fontSize: 12, marginTop: 10, padding: 0, flexWrap: 'wrap' }} aria-live="polite">
@@ -335,12 +378,17 @@ export function TakeoverDesk() {
 
           <ActorPicker actor={actor} balances={balances.data ?? {}} ceo={seat.ceo} />
 
-          {actor.mode === 'wallet' && faucet.data && !faucet.data.claimed && BigInt(faucet.data.pool_left) > 0n && (
+          {actor.mode === 'wallet' && faucet.data && !faucet.data.claimed && !faucetEmpty && (
             <div>
               <button type="button" className="ghost" onClick={() => void claim()}>
-                Claim {Number(FAUCET_WHOLE).toLocaleString('en-US')} CTO
+                Claim {cto(faucet.data.amount)} CTO
               </button>
             </div>
+          )}
+          {actor.mode === 'wallet' && faucetEmpty && faucet.data && (
+            <p className="mono" style={{ margin: 0, fontSize: 13 }}>
+              The faucet is empty: {cto(faucet.data.pool_left)} CTO left in its pool, less than one {cto(faucet.data.amount)} CTO claim.
+            </p>
           )}
 
           <div style={{ display: 'grid', gap: 8 }}>
@@ -365,6 +413,16 @@ export function TakeoverDesk() {
                     ? `One transaction: pay, burn, set face, delete ${quote.ceo}'s key, add yours.`
                     : 'One transaction: pay, burn, set face, add your key.'}
             </p>
+            {short && actor.mode === 'wallet' && coinKey === 'main' && (
+              <Shortfall
+                seat={seat}
+                config={config}
+                faucet={faucet.data}
+                readAt={state.readAt}
+                demoTo={coinPath(pathname, 'demo')}
+                onDemo={() => setMode('demo')}
+              />
+            )}
             {mode === 'wallet' && actor.mode === 'wallet' && <p className="mono muted" style={{ margin: 0, fontSize: 12 }}>Your wallet signs take_seat with {TAKE_SEAT_NEAR} NEAR attached. A new voice key is made in this browser.</p>}
           </div>
 
@@ -377,6 +435,7 @@ export function TakeoverDesk() {
             <div role="alert" className="a-shake" style={{ background: 'var(--color-reject)', border: '3px solid var(--color-ink)', padding: 16 }}>
               <p className="kick">{priceMoved ? 'Price moved' : status.error.source === 'near' ? 'NEAR rejected the transaction' : 'Not sent'}</p>
               <p style={{ margin: '0 0 10px', fontWeight: 700, overflowWrap: 'anywhere' }}>{status.error.message}</p>
+              {status.retryAt !== undefined && <RetryIn at={status.retryAt} />}
               {'raw' in status.error && (
                 <pre className="mono" style={{ whiteSpace: 'pre-wrap', background: 'var(--color-ink)', color: 'var(--color-paper)', padding: 12, margin: '0 0 10px', fontSize: 12, maxHeight: 220, overflow: 'auto' }}>
                   {JSON.stringify(status.error.raw, null, 2)}
@@ -400,6 +459,75 @@ export function TakeoverDesk() {
       <PhoneBar price={quote.price} label={sending ? 'SENDING…' : 'TAKE THE SEAT'} onClick={() => void take()} />
       <div className="has-phonebar" aria-hidden="true" />
     </>
+  );
+}
+
+/** "Try again in N s": counts down each second; with reduced motion it changes once, when the wait is over. */
+function RetryIn({ at }: { at: number }) {
+  const reduced = useReducedMotion();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (now >= at) return;
+    const id = setTimeout(() => setNow(Date.now()), reduced ? at - now : Math.min(1000, at - now));
+    return () => clearTimeout(id);
+  }, [now, at, reduced]);
+  const left = Math.ceil((at - now) / 1000);
+  return (
+    <p className="mono" aria-live="off" style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700 }} data-testid="retry-in">
+      {left > 0 ? `Try again in ${left} s.` : 'You can try again now.'}
+    </p>
+  );
+}
+
+/**
+ * Main coin, wallet mode, not enough CTO. The faucet gives one fixed claim and the
+ * price ladder soon passes it, so say so plainly, say when decay brings the price
+ * down (from get_seat + get_config), and offer the demo coin.
+ */
+function Shortfall({
+  seat,
+  config,
+  faucet,
+  readAt,
+  demoTo,
+  onDemo,
+}: {
+  seat: SeatView;
+  config: ConfigView | undefined;
+  faucet: FaucetStatus | undefined;
+  readAt: number;
+  demoTo: string;
+  onDemo: () => void;
+}) {
+  const price = BigInt(seat.current_price);
+  const aboveClaim = faucet !== undefined && price > BigInt(faucet.amount);
+  let decay: string | undefined;
+  if (config && !seat.vacant && seat.since_ns && price > BigInt(seat.floor)) {
+    const floor = `${cto(seat.floor)} CTO`;
+    if (seat.decaying) {
+      const floorAt = nsToDate(seat.since_ns).getTime() + (config.decay_delay_s + config.decay_length_s) * 1000;
+      decay = `The price is already falling and reaches its floor of ${floor} on ${dateTime(new Date(floorAt))}.`;
+    } else {
+      const startAt = readAt + seat.seconds_until_decay * 1000;
+      const floorAt = startAt + config.decay_length_s * 1000;
+      decay = `If nobody takes the seat first, the price starts falling on ${dateTime(new Date(startAt))} and reaches its floor of ${floor} on ${dateTime(new Date(floorAt))}.`;
+    }
+  }
+  return (
+    <div className="card" style={{ padding: 14, boxShadow: 'none', display: 'grid', gap: 8 }} data-testid="shortfall">
+      {aboveClaim && (
+        <p style={{ margin: 0 }}>
+          The seat costs {cto(seat.current_price)} CTO, more than the {cto(faucet.amount)} CTO one faucet claim gives{faucet.claimed ? ', and each wallet can claim once' : ''}.
+        </p>
+      )}
+      {decay && <p style={{ margin: 0 }}>{decay}</p>}
+      <p style={{ margin: 0 }}>Or run the whole story now on the demo coin, with ready-made accounts and no wallet.</p>
+      <div>
+        <Link className="ghost" to={demoTo} onClick={onDemo}>
+          Switch to the demo coin →
+        </Link>
+      </div>
+    </div>
   );
 }
 

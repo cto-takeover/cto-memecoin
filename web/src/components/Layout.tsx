@@ -1,7 +1,7 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router';
-import { COINS, type CoinKey } from '../config';
+import { COINS } from '../config';
 import { CoinDataProvider, useCoinData } from '../hooks/coinData';
-import { useCoin, useCoinKey, useCoinLink } from '../hooks/hooks';
+import { coinPath, useCoin, useCoinKey, useCoinLink } from '../hooks/hooks';
 import { cto, ctoShort, ratio, times } from '../lib/format';
 
 const SECTIONS = [
@@ -47,7 +47,7 @@ function Masthead() {
             VOL. 1 · NO. {state ? takeovers + 1 : '…'} · TESTNET EDITION · {today}
           </p>
           <p className="hd" style={{ fontSize: 'clamp(34px, 7vw, 46px)' }}>
-            <Link to={link('/')} style={{ textDecoration: 'none' }}>
+            <Link to={link('/')} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', minHeight: 44 }}>
               THE CTO TIMES
             </Link>
           </p>
@@ -74,17 +74,16 @@ function Masthead() {
 function CoinSwitch() {
   const current = useCoinKey();
   const { pathname } = useLocation();
-  const to = (k: CoinKey) => (k === 'main' ? `${pathname}?coin=main` : pathname);
   return (
     <div role="group" aria-label="Which coin" style={{ display: 'flex', gap: 0 }} className="mono">
       {(['demo', 'main'] as const).map((k) => (
         <Link
           key={k}
-          to={to(k)}
+          to={coinPath(pathname, k)}
           aria-current={k === current ? 'true' : undefined}
           className="chip"
           style={{
-            minHeight: 32,
+            minHeight: 44,
             fontWeight: 700,
             background: k === current ? 'var(--color-ink)' : 'var(--color-card)',
             color: k === current ? 'var(--color-paper)' : 'var(--color-ink)',
