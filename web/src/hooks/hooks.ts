@@ -12,19 +12,27 @@ export function useCoin() {
   return COINS[useCoinKey()];
 }
 
+/** The masthead coin switch's target: the same page on the other coin. */
+export const coinPath = (pathname: string, key: CoinKey) => (key === 'main' ? `${pathname}?coin=main` : pathname);
+
 /** A path that keeps the current ?coin= choice. */
 export function useCoinLink() {
   const key = useCoinKey();
-  return useCallback((path: string) => (key === 'main' ? `${path}?coin=main` : path), [key]);
+  return useCallback((path: string) => coinPath(path, key), [key]);
 }
 
-/** Calls `load` now and every `ms`, paused while the tab is hidden. `refresh()` reloads at once. */
+/**
+ * Calls `load` now and every `ms`, paused while the tab is hidden. A tick is
+ * skipped while the previous poll is still in flight, so a slow RPC never piles
+ * up requests. `refresh()` reloads at once.
+ */
 export function usePoll<T>(load: () => Promise<T>, ms: number | null, deps: unknown[]) {
   const [data, setData] = useState<T | undefined>(undefined);
   const [error, setError] = useState<unknown>(undefined);
   const loadRef = useRef(load);
   loadRef.current = load;
   const gen = useRef(0);
+  const inFlight = useRef<object | null>(null);
 
   const refresh = useCallback(async () => {
     const mine = ++gen.current;
@@ -42,15 +50,25 @@ export function usePoll<T>(load: () => Promise<T>, ms: number | null, deps: unkn
   }, []);
 
   useEffect(() => {
+    const tick = () => {
+      if (inFlight.current) return;
+      const token = {};
+      inFlight.current = token;
+      void refresh().finally(() => {
+        if (inFlight.current === token) inFlight.current = null;
+      });
+    };
     setData(undefined);
-    void refresh();
+    inFlight.current = null;
+    tick();
     if (ms === null) return;
     const id = setInterval(() => {
-      if (document.visibilityState === 'visible') void refresh();
+      if (document.visibilityState === 'visible') tick();
     }, ms);
     return () => {
       clearInterval(id);
       gen.current++;
+      inFlight.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);

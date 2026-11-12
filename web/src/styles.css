@@ -157,9 +157,11 @@
     text-decoration: none;
     color: var(--color-ink);
   }
+  /* Interactive chips keep the chip look but meet the 44 px target size (DESIGN.md). */
   a.chip,
   button.chip {
-    min-height: 32px;
+    min-height: 44px;
+    box-sizing: border-box;
   }
   .chip.ok,
   .ok {

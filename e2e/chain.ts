@@ -5,6 +5,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import constants from '../reference/constants.json' with { type: 'json' };
+import type { Page } from '@playwright/test';
 import { postRpc } from '../web/src/lib/jsonrpc';
 
 export const S = {
@@ -40,6 +41,7 @@ export interface Takeover {
   burned: string;
   face: Face;
   voice_key: string;
+  at_ns: string;
 }
 export interface Announcement {
   index: number;
@@ -68,6 +70,13 @@ export async function view<T>(contract: string, method: string, args: object = {
 export const seat = (c = S.demo) => view<Seat>(c, 'get_seat');
 export const supply = (c = S.demo) => view<string>(c, 'ft_total_supply').then(BigInt);
 export const history = (limit = 2, c = S.demo) => view<Takeover[]>(c, 'get_history', { from_index: 0, limit });
+/** The first takeover ever: get_history pages newest first, so it sits at from_index = latest.index. */
+export async function firstTakeover(c = S.demo): Promise<Takeover | undefined> {
+  const [latest] = await history(1, c);
+  if (!latest) return undefined;
+  const [first] = await view<Takeover[]>(c, 'get_history', { from_index: latest.index, limit: 1 });
+  return first;
+}
 export const announcements = (limit = 1, c = S.demo) => view<Announcement[]>(c, 'get_announcements', { limit });
 export const balance = (account: string, c = S.demo) => view<string>(c, 'ft_balance_of', { account_id: account }).then(BigInt);
 export const config = (c: string) => view<Record<string, unknown>>(c, 'get_config');
@@ -111,4 +120,23 @@ export async function budget(kind: 'take-seat' | 'announce'): Promise<void> {
     }
     await sleep(wait + 50);
   }
+}
+
+// ------------------------------------------------------------------ target size
+
+// DESIGN.md: 44 px+ targets. Every button-like control the app draws: buttons, nav
+// pills, the coin switch, tx chips, radio and tab roles. Inline text links inside a
+// sentence are exempt (WCAG 2.5.8 "inline").
+export const TARGETS = 'button, a.btn, a.ghost, a.chip, a.navp, [role="radio"], [role="tab"]';
+
+/** Visible targets under 44 px, as "tag "label" w×h" strings. */
+export function smallTargets(page: Page): Promise<string[]> {
+  return page.evaluate((sel) =>
+    [...document.querySelectorAll<HTMLElement>(sel)]
+      .filter((el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden')
+      .map((el) => ({ el, r: el.getBoundingClientRect() }))
+      .filter(({ r }) => r.height < 44 || r.width < 44)
+      .map(({ el, r }) => `${el.tagName.toLowerCase()} "${(el.getAttribute('aria-label') ?? el.textContent ?? '').trim().slice(0, 40)}" ${Math.round(r.width)}×${Math.round(r.height)}`),
+    TARGETS,
+  );
 }

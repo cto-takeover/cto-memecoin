@@ -102,7 +102,7 @@ export function Receipts() {
               <span className="mono" style={{ color: 'var(--color-paper)', fontSize: 13 }}>
                 $ live checks · {contractId} · from this browser
               </span>
-              <button type="button" className="chip" style={{ background: 'var(--color-paper)', cursor: 'pointer', minHeight: 36 }} onClick={() => void run()}>
+              <button type="button" className="chip" style={{ background: 'var(--color-paper)', cursor: 'pointer' }} onClick={() => void run()}>
                 ↺ Run again
               </button>
             </div>
@@ -131,8 +131,8 @@ export function Receipts() {
                 </pre>
               </details>
             )}
-            <p className="mono" style={{ margin: '12px 0 0', fontSize: 12 }}>
-              <a href={`${REPO_URL}/actions`} style={{ color: 'var(--color-paper)' }} target="_blank" rel="noreferrer">
+            <p className="mono" style={{ margin: '2px 0 0', fontSize: 12 }}>
+              <a href={`${REPO_URL}/actions`} style={{ color: 'var(--color-paper)', display: 'inline-flex', alignItems: 'center', minHeight: 44 }} target="_blank" rel="noreferrer">
                 All 12 checks run in CI on every push ↗
               </a>
             </p>
