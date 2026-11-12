@@ -11,7 +11,7 @@ Submit by Sat Nov 14, 19:00 WIB (12:00 UTC). The form closes Nov 14, 23:59 UTC (
 | Tracks | Memecoins With Mechanics |
 | NEAR wallet address | (your **mainnet** account; the prize is paid here) |
 | Repository link | https://github.com/cto-takeover/cto-memecoin |
-| Demo post link | (the X post URL) |
+| Demo post link | https://x.com/0xc1d/status/2120811270299640038 |
 | Website | https://ctotimes.xyz |
 | Consent | tick |
 

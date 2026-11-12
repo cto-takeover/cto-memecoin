@@ -11,3 +11,7 @@ web/dist/
 web/public/build-info.json
 e2e/results/
 e2e/report/
+# demo video: outputs, Python env and the Kokoro model stay local (see video/README.md)
+video/out/
+video/.venv/
+video/models/

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>THE CTO TIMES · cold open (scene 1)</title>
+    <link rel="stylesheet" href="common.css" />
+    <style>
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+      }
+      .top {
+        position: absolute;
+        left: 90px;
+        right: 90px;
+        top: 30px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+      }
+      #mast {
+        position: absolute;
+        left: 84px;
+        top: 52px;
+        font-size: 178px;
+        white-space: nowrap;
+      }
+      .rules {
+        position: absolute;
+        left: 90px;
+        right: 90px;
+        top: 250px;
+      }
+      #stop {
+        position: absolute;
+        left: 1318px;
+        top: 142px;
+        font-size: 78px;
+        color: var(--red);
+      }
+      #headline {
+        position: absolute;
+        left: 90px;
+        top: 292px;
+        font-size: 132px;
+        white-space: nowrap;
+      }
+      #deck {
+        position: absolute;
+        left: 90px;
+        top: 604px;
+        width: 1060px;
+        font-size: 42px;
+        font-weight: 500;
+        line-height: 1.24;
+      }
+      #dateline {
+        position: absolute;
+        left: 90px;
+        top: 842px;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+      #inset {
+        position: absolute;
+        left: 1262px;
+        top: 556px;
+        width: 568px;
+      }
+      #inset .label {
+        display: inline-block;
+        background: var(--hi);
+        border: 4px solid var(--ink);
+        border-bottom: 0;
+        padding: 8px 14px 6px;
+        font-size: 21px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+      }
+      #inset img {
+        display: block;
+        width: 560px;
+        height: 320px;
+        border: 4px solid var(--ink);
+        box-shadow: 8px 8px 0 var(--ink);
+        box-sizing: content-box;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card-page">
+      <div class="sheet" id="sheet">
+        <div class="top mono"><span>VOL. 1 · SPECIAL BULLETIN · TESTNET EDITION</span><span>ONE SEAT · ONE CEO</span></div>
+        <div class="hd" id="mast">THE CTO TIMES</div>
+        <div class="rules">
+          <div class="rule"></div>
+          <div class="rule thin"></div>
+        </div>
+        <div class="hd" id="headline">EX-CEO LOCKED OUT,<br />BY NEAR ITSELF</div>
+        <div id="deck">Boardroom coup at a memecoin: the old CEO is paid to leave, then finds her key to the coin's voice is gone.</div>
+        <div class="mono" id="dateline">LIVE FOOTAGE FOLLOWS · NEAR TESTNET</div>
+        <div id="inset">
+          <!-- The only chain data on this card: real frames from this run's rejection (scene 6), labelled. -->
+          <div class="label mono">COMING UP · REAL TESTNET FOOTAGE</div>
+          <img id="flash" alt="" />
+        </div>
+        <span class="stamp" id="stop">STOP PRESS</span>
+      </div>
+    </div>
+    <script type="module">
+      import { boot, scene, slam, thunk } from './common.js';
+
+      const $ = (id) => document.getElementById(id);
+      // Fit the headline to the page width once the fonts are in.
+      const fit = (node, max) => {
+        let size = parseFloat(getComputedStyle(node).fontSize);
+        while (node.getBoundingClientRect().width > max && size > 40) node.style.fontSize = `${(size -= 2)}px`;
+      };
+
+      boot(async (t, TL) => {
+        const s = scene(TL, 1);
+        const m = s.marks;
+        if (!fit.done) {
+          fit($('headline'), 1740);
+          fit($('mast'), 1290);
+          fit.done = true;
+        }
+        // Frame 0 already shows the masthead and the headline; they land with a slam.
+        $('sheet').style.transform = slam(t, [s.start, m.stamp, m.inset], TL.fps);
+        // (The voice starts 0.4 s after this first slam; the stamp is down before it speaks.)
+        const st = thunk(t, m.stamp, 0.26);
+        $('stop').style.opacity = st.opacity;
+        $('stop').style.transform = `rotate(-8deg) scale(${st.scale})`;
+
+        const k = Math.floor((t - m.inset) * TL.fps + 1e-6);
+        const inset = $('inset');
+        if (k < 0) {
+          inset.style.visibility = 'hidden';
+        } else {
+          inset.style.visibility = 'visible';
+          const img = $('flash');
+          const src = `../out/flash/${String(Math.min(k, m.insetFrames - 1)).padStart(2, '0')}.png`;
+          if (!img.src.endsWith(src.slice(2))) {
+            img.src = src;
+            await img.decode();
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

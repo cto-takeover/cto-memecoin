@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>THE CTO TIMES · the premise (scene 2)</title>
+    <link rel="stylesheet" href="common.css" />
+    <style>
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+      }
+      .top {
+        position: absolute;
+        left: 90px;
+        right: 90px;
+        top: 26px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+      .top .hd {
+        font-size: 56px;
+      }
+      .top .mono {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        padding-bottom: 8px;
+      }
+      .rules {
+        position: absolute;
+        left: 90px;
+        right: 90px;
+        top: 100px;
+      }
+      #headline {
+        position: absolute;
+        left: 90px;
+        top: 138px;
+        font-size: 124px;
+        white-space: nowrap;
+      }
+      .label {
+        position: absolute;
+        left: 90px;
+        font-size: 50px;
+        font-weight: 700;
+      }
+      #usually {
+        top: 352px;
+        color: var(--muted);
+      }
+      #old {
+        position: absolute;
+        left: 372px;
+        top: 304px;
+      }
+      #old .stamp {
+        font-size: 104px;
+        color: var(--ink);
+      }
+      #strike {
+        position: absolute;
+        left: -22px;
+        right: -22px;
+        top: 50%;
+        height: 14px;
+        margin-top: -9px;
+        background: var(--red);
+        border: 2px solid var(--ink);
+        transform-origin: 0 50%;
+      }
+      #cto {
+        top: 548px;
+        font-family: var(--display);
+        font-weight: 400;
+        font-size: 60px;
+      }
+      #new {
+        position: absolute;
+        left: 372px;
+        top: 520px;
+        background: var(--near);
+        border: 5px solid var(--ink);
+        box-shadow: 8px 8px 0 var(--ink);
+        padding: 22px 30px 20px;
+        font-size: 62px;
+        white-space: nowrap;
+        transform-origin: 20% 50%;
+      }
+      #rules {
+        position: absolute;
+        left: 90px;
+        top: 742px;
+        padding: 34px 34px 24px;
+        font-size: 37px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      #rules .chip {
+        position: absolute;
+        left: 22px;
+        top: -24px;
+        background: var(--ink);
+        color: var(--paper);
+        font-size: 24px;
+        letter-spacing: 0.14em;
+        padding: 7px 16px 6px;
+      }
+      #rules .sep {
+        color: var(--red);
+        padding: 0 14px;
+      }
+      #note {
+        position: absolute;
+        left: 96px;
+        top: 878px;
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card-page">
+      <div class="sheet" id="sheet">
+        <div class="top"><span class="hd">THE CTO TIMES</span><span class="mono">PAGE 2 · THE QUESTION · TESTNET EDITION</span></div>
+        <div class="rules">
+          <div class="rule"></div>
+          <div class="rule thin"></div>
+        </div>
+        <div class="hd" id="headline">WHO RUNS YOUR MEMECOIN?</div>
+
+        <div class="label" id="usually">Usually:</div>
+        <div id="old">
+          <span class="stamp" id="oldStamp">ONE DEV. ONE KEY.</span>
+          <div id="strike"></div>
+        </div>
+
+        <div class="label" id="cto">$CTO:</div>
+        <div class="hd" id="new">ONE CEO SEAT. ANYONE CAN TAKE IT.</div>
+
+        <!-- The rule as text, labelled RULES: not chain data. -->
+        <div class="box mono" id="rules">
+          <span class="chip">RULES</span>
+          Take it: pay 1.4x<span class="sep">·</span>Old CEO gets 1.15x back<span class="sep">·</span>0.25x burned
+        </div>
+        <div class="mono" id="note">The rules of the coin, as text. The numbers in the footage come from the app.</div>
+      </div>
+    </div>
+    <script type="module">
+      import { boot, clamp, easeOut, ramp, scene, slam, thunk } from './common.js';
+
+      const $ = (id) => document.getElementById(id);
+      let fitted = false;
+
+      boot((t, TL) => {
+        const s = scene(TL, 2);
+        const m = s.marks;
+        if (!fitted) {
+          const h = $('headline');
+          let size = 124;
+          while (h.getBoundingClientRect().width > 1740 && size > 40) h.style.fontSize = `${(size -= 2)}px`;
+          fitted = true;
+        }
+        $('sheet').style.transform = slam(t, [s.start, m.stampIn, m.strike, m.swap], TL.fps);
+
+        // "Usually: ONE DEV. ONE KEY." is stamped...
+        $('usually').style.opacity = ramp(t, s.start + 0.1, 0.15);
+        const a = thunk(t, m.stampIn, 0.26);
+        const struck = t >= m.strike;
+        $('old').style.opacity = a.opacity;
+        $('oldStamp').style.opacity = t >= m.swap ? 0.4 : 1;
+        $('oldStamp').style.transform = `rotate(-3deg) scale(${a.scale})`;
+        // ...then struck through...
+        $('strike').style.transform = `rotate(-3deg) scaleX(${struck ? easeOut(ramp(t, m.strike, 0.2)) : 0})`;
+        // ...and replaced by the $CTO line.
+        const b = thunk(t, m.swap, 0.26);
+        $('cto').style.opacity = clamp(b.opacity);
+        $('new').style.opacity = b.opacity;
+        $('new').style.transform = `scale(${1 + (b.scale - 1) * 0.5})`;
+
+        const r = easeOut(ramp(t, m.rules, 0.3));
+        for (const id of ['rules', 'note']) {
+          $(id).style.opacity = r;
+          $(id).style.transform = `translateY(${Math.round((1 - r) * 22)}px)`;
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -52,6 +52,22 @@ You do not need a wallet. The app starts on the demo coin. Two demo accounts, an
 
 > **Note:** One faucet claim pays for a seat price up to 2,000,000 CTO. After a few takeovers on the main coin, the price can be higher than that. The Takeover desk then shows when the price starts to fall. Until then, use the demo coin.
 
+## Demo video
+
+- **Video:** <!-- video-url -->[on X](https://x.com/0xc1d/status/2120811270299640038)<!-- /video-url --> · 70 s · 1920x1080.
+- Recorded on Thu Nov 12, 2026 by script from the live app on the demo coin `demo-cto.testnet`: no wallet, no keys, only "Play as ani / budi". How it is made, and what is and is not edited: [`video/README.md`](video/README.md). Script: [`docs/video-script.md`](docs/video-script.md).
+- Narration is an AI voice; all footage is the live app on NEAR testnet.
+
+Transactions in the video ([`video/txs.json`](video/txs.json)):
+
+| Step | Transaction |
+| --- | --- |
+| ani takes the seat for 1,000,000 CTO | [`9ckt…krj4`](https://testnet.nearblocks.io/txns/9cktnak12SeqW58zbrTRd2jjwY3TVTFsbegD8quBkrj4) |
+| ani posts as the coin | [`12x8…vqiG`](https://testnet.nearblocks.io/txns/12x8GZ2PeGYFUrM6GVZY6pDZieSmLwZfF2mKgKkJvqiG) |
+| budi takes it for 1,400,000; ani is paid 1,150,000; 250,000 burned; ani's key deleted, budi's key added | [`5zLm…GQCV`](https://testnet.nearblocks.io/txns/5zLmBZQUUXzNrbC1HmkhSzBUboXMWPHN68k5co2YGQCV) · [receipts with `DeleteKey` + `AddKey`](https://testnet.near.rocks/tx/5zLmBZQUUXzNrbC1HmkhSzBUboXMWPHN68k5co2YGQCV) |
+| ani's post rejected: `AccessKeyNotFound` | no hash: NEAR refuses it before it runs. NEAR's answer and the time are in `video/txs.json` |
+| budi posts as the coin (after the video) | [`GPYd…Vw4a`](https://testnet.nearblocks.io/txns/GPYdGMibjgUZ1ud81wD41qqg2y1rjCN9fF388NnxVw4a) |
+
 ## How it works
 
 | Rule | On chain |
@@ -196,6 +212,7 @@ To run all the layers, run `npm run test:all`. CI runs all six layers on each pu
 | `web/` | The Vite + React app. `web/api/demo/` is the demo relayer (Vercel functions). |
 | `verify/`, `e2e/` | `npm run verify` and the Playwright tests |
 | `reference/` | `constants.json` (every number), the 24 lines, and the face parts |
+| `video/` | The demo video pipeline: recorder, broadcast package, voice, sound, edit, checks |
 | `specs/`, `docs/` | The build specs, the PRD, the design system, and the [build kit](docs/BUILD-KIT.md) |
 | `scripts/deploy.md` | The deploy runbook with the exact commands |
 

@@ -211,17 +211,17 @@ After step 3, make sure that the app uses the deployed coins:
 
 ## Film the video on the demo coin (Sat Nov 14)
 
-Film scenes 2–6 of `docs/video-script.md` on **demo-cto.testnet**. Use a private window with no wallet. "Play as" signs for ani and budi through the relayer.
+Film scenes 3–7 of `docs/video-script.md` on **demo-cto.testnet**, with no wallet. "Play as" signs for ani and budi through the relayer. `video/run.mjs` does all of it by script (see `video/README.md`). By hand:
 
 1. Wait until nobody has taken the demo seat for 5 minutes. This includes e2e runs.
    The price is back at the floor, 1,000,000 CTO.
 2. Play as ani. Take the seat with face #2,626 (batik / laser / grin / CEO tie).
-3. As ani, post a line as the coin. Film the Front page (scene 2).
+3. As ani, post a line as the coin. Film the Front page (scene 3).
 4. Within 2 minutes of ani's takeover, play as budi. After 2 minutes, the price starts to fall.
-5. As budi, select face #672 part by part and press TAKE THE SEAT (scenes 3 and 4).
+5. As budi, select face #672 part by part and press TAKE THE SEAT (scenes 4 and 5).
    Budi pays 1,400,000. Ani gets +1,150,000.
-6. In the Press office, press TRY POSTING AS ani. Film NEAR's error and the REJECTED BY NEAR stamp (scene 5).
-7. Film Receipts (scene 6).
+6. In the Press office, press TRY POSTING AS ani. Film NEAR's error and the REJECTED BY NEAR stamp (scene 6).
+7. Film Receipts (scene 7).
 
 > **Note:** The total burned and the supply on screen are the demo coin's real totals. They will not read 1,250,000 / 998,750,000, so the voiceover does not say them.
 

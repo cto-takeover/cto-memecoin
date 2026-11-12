@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>THE CTO TIMES · newsprint wipe (10 frames)</title>
+    <link rel="stylesheet" href="common.css" />
+    <style>
+      html,
+      body {
+        width: 1920px;
+        height: 1028px; /* everything above the ticker: the ticker stays on every frame */
+        background: transparent;
+      }
+      #sheet {
+        position: absolute;
+        top: 0;
+        height: 1028px;
+        background-color: var(--paper);
+        background-image: radial-gradient(#e2d2a8 2px, transparent 2.4px);
+        background-size: 16px 16px;
+        border-right: 14px solid var(--ink);
+        border-left: 14px solid var(--ink);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ?i=0..9. Frames 0-4 cover the outgoing scene from the left; 5-9 uncover the
+         incoming one. A sheet of cream newsprint with an ink edge, nothing else. -->
+    <div id="sheet"></div>
+    <script>
+      const COVER = [0.22, 0.48, 0.72, 0.9, 1];
+      const OPEN = [0.1, 0.3, 0.54, 0.78, 0.94];
+      window.render = (i) => {
+        const s = document.getElementById('sheet');
+        if (i < COVER.length) {
+          s.style.left = '-14px';
+          s.style.width = `${Math.round(1920 * COVER[i]) + 14}px`;
+        } else {
+          const x = Math.round(1920 * OPEN[i - COVER.length]);
+          s.style.left = `${x}px`;
+          s.style.width = `${1920 - x + 14}px`;
+        }
+      };
+      window.render(Number(new URLSearchParams(location.search).get('i') ?? 0));
+      window.ready = true;
+    </script>
+  </body>
+</html>

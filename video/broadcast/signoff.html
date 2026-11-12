@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>THE CTO TIMES · sign-off (scene 8)</title>
+    <link rel="stylesheet" href="common.css" />
+    <style>
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+      }
+      .col {
+        position: absolute;
+        left: 0;
+        right: 0;
+        text-align: center;
+        white-space: nowrap;
+      }
+      #coin {
+        top: 26px;
+        font-size: 236px;
+      }
+      #tagline {
+        top: 292px;
+        font-size: 60px;
+        font-weight: 700;
+      }
+      #facts {
+        top: 392px;
+        font-size: 32px;
+        font-weight: 700;
+      }
+      #urlrow {
+        top: 468px;
+      }
+      #url {
+        display: inline-block;
+        background: var(--hi);
+        border: 5px solid var(--ink);
+        box-shadow: 8px 8px 0 var(--ink);
+        padding: 14px 34px 12px;
+        font-size: 76px;
+        transform: rotate(-2deg);
+      }
+      #built {
+        top: 640px;
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+      #ai {
+        top: 696px;
+        font-size: 26px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      #closerow {
+        top: 792px;
+      }
+      #close {
+        font-size: 74px;
+        color: var(--red);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card-page">
+      <div class="sheet" id="sheet">
+        <div class="col hd" id="coin">$CTO</div>
+        <div class="col" id="tagline">The memecoin where anyone can take over.</div>
+        <div class="col mono" id="facts">Built on NEAR · testnet only · no admin keys</div>
+        <div class="col" id="urlrow"><span class="hd" id="url">ctotimes.xyz</span></div>
+        <div class="col mono" id="built">Built at NEAR HACKATHON · #NEARHackathon</div>
+        <div class="col mono" id="ai">AI voice · real testnet footage</div>
+        <div class="col" id="closerow"><span class="stamp" id="close">THERE CAN ONLY BE ONE CEO.</span></div>
+      </div>
+    </div>
+    <script type="module">
+      import { boot, easeOut, ramp, scene, slam, thunk } from './common.js';
+
+      const $ = (id) => document.getElementById(id);
+
+      boot((t, TL) => {
+        const s = scene(TL, 8);
+        const m = s.marks;
+        // Seven elements land one by one, 0.4 s apart (m.lands); the closing stamp is the last.
+        $('sheet').style.transform = slam(t, [m.lands[0], m.stamp], TL.fps);
+        const coin = thunk(t, m.lands[0], 0.2);
+        $('coin').style.opacity = coin.opacity;
+        $('coin').style.transform = `scale(${1 + (coin.scale - 1) * 0.35})`;
+        ['tagline', 'facts', 'urlrow', 'built', 'ai'].forEach((id, i) => {
+          const k = easeOut(ramp(t, m.lands[i + 1], 0.22));
+          $(id).style.opacity = k;
+          $(id).style.transform = `translateY(${Math.round((1 - k) * 18)}px)`;
+        });
+        const c = thunk(t, m.stamp, 0.28);
+        $('close').style.opacity = c.opacity;
+        $('close').style.transform = `rotate(-4deg) scale(${c.scale})`;
+      });
+    </script>
+  </body>
+</html>

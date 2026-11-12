@@ -1,0 +1,75 @@
+{
+  "_note": "Transactions of the demo video run (docs/video-script.md), on demo-cto.testnet. Written by video/run.mjs and video/budi-post.mjs; a rejected post has no hash because NEAR refuses it before it runs.",
+  "ani_takeover": "9cktnak12SeqW58zbrTRd2jjwY3TVTFsbegD8quBkrj4",
+  "ani_announcement": "12x8GZ2PeGYFUrM6GVZY6pDZieSmLwZfF2mKgKkJvqiG",
+  "budi_takeover": "5zLmBZQUUXzNrbC1HmkhSzBUboXMWPHN68k5co2YGQCV",
+  "ex_ceo_rejected_post": {
+    "account": "ani-cto.testnet",
+    "error": "InvalidTxError.InvalidAccessKeyError.AccessKeyNotFound",
+    "txHash": null,
+    "at": "2026-11-12T03:51:16.988Z",
+    "relayer_reply": {
+      "error": {
+        "source": "near",
+        "type": "InvalidTxError.InvalidAccessKeyError.AccessKeyNotFound",
+        "message": "{\"account_id\":\"demo-cto.testnet\",\"public_key\":\"ed25519:GAxUC5auAdM7mDearPwWdA7n2sG38fUzEE6QuNq5gqyz\"}",
+        "raw": {
+          "name": "HANDLER_ERROR",
+          "cause": {
+            "info": {},
+            "name": "INVALID_TRANSACTION"
+          },
+          "code": -32000,
+          "message": "Server error",
+          "data": {
+            "TxExecutionError": {
+              "InvalidTxError": {
+                "InvalidAccessKeyError": {
+                  "AccessKeyNotFound": {
+                    "account_id": "demo-cto.testnet",
+                    "public_key": "ed25519:GAxUC5auAdM7mDearPwWdA7n2sG38fUzEE6QuNq5gqyz"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "request": {
+      "as": "ani",
+      "line": 3,
+      "takeoverIndex": 30
+    }
+  },
+  "run": {
+    "rehearsal": false,
+    "coin": "demo-cto.testnet",
+    "at": "2026-11-12T03:52:04.061Z"
+  },
+  "budi_announcement": {
+    "txHash": "GPYdGMibjgUZ1ud81wD41qqg2y1rjCN9fF388NnxVw4a",
+    "index": 10,
+    "text": "The face is mine until someone pays 1,000,000 CTO."
+  },
+  "explorer": {
+    "url": "https://testnet.near.rocks/tx/5zLmBZQUUXzNrbC1HmkhSzBUboXMWPHN68k5co2YGQCV",
+    "transfer": "1150000 CTOD",
+    "burn": "250000 CTOD",
+    "deleteKey": true,
+    "addKey": true
+  },
+  "budi_takeover_on_chain": {
+    "ceo": "budi-cto.testnet",
+    "previous": "ani-cto.testnet",
+    "paid": "1,400,000",
+    "payout": "1,150,000",
+    "burned": "250,000",
+    "face": {
+      "bg": 1,
+      "eyes": 2,
+      "mouth": 3,
+      "extra": 7
+    }
+  }
+}

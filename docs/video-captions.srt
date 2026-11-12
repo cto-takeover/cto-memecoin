@@ -1,75 +1,119 @@
 1
-00:00:00,800 --> 00:00:02,807
-Every memecoin says the community
+00:00:00,267 --> 00:00:01,567
+Stop the presses.
 
 2
-00:00:02,807 --> 00:00:04,632
-runs it. But the logo, and the
+00:00:01,567 --> 00:00:04,000
+A memecoin just fired its CEO.
 
 3
-00:00:04,632 --> 00:00:06,517
-voice, still belong to one dev.
+00:00:04,333 --> 00:00:07,167
+Most memecoins: one dev holds the keys.
 
 4
-00:00:07,920 --> 00:00:10,600
-CTO fixes that. The coin has one
+00:00:07,167 --> 00:00:08,733
+C-T-O has one CEO seat,
 
 5
-00:00:10,600 --> 00:00:13,531
-CEO seat, and anyone can take it by
+00:00:08,733 --> 00:00:11,000
+and anyone can take it.
 
 6
-00:00:13,531 --> 00:00:15,792
-paying 1.4× the last price.
+00:00:11,533 --> 00:00:13,167
+Live from the boardroom.
 
 7
-00:00:16,990 --> 00:00:19,344
-Budi builds a new face from 4,096
+00:00:13,167 --> 00:00:15,533
+ani runs the coin's face and voice.
 
 8
-00:00:19,344 --> 00:00:21,555
-safe parts, and takes the seat.
+00:00:15,533 --> 00:00:17,333
+Her seat costs one-point-four times
 
 9
-00:00:23,450 --> 00:00:26,454
-Ani is fired, but paid: 1.15 million CTO.
+00:00:17,333 --> 00:00:18,767
+what she paid.
 
 10
-00:00:26,454 --> 00:00:29,532
-The rest is burned forever, so every fight
+00:00:19,667 --> 00:00:20,967
+Enter budi.
 
 11
-00:00:29,532 --> 00:00:31,877
-for the seat shrinks the supply.
+00:00:20,967 --> 00:00:23,233
+A new face from fixed parts.
 
 12
-00:00:33,580 --> 00:00:36,092
-Now Ani tries to post as the coin. NEAR
+00:00:23,233 --> 00:00:25,767
+One-point-four million C-T-O.
 
 13
-00:00:36,092 --> 00:00:38,926
-rejects her. Her key was deleted in the same
+00:00:26,500 --> 00:00:28,000
+Take the seat.
 
 14
-00:00:38,926 --> 00:00:41,695
-transaction, so the protocol, not a server,
+00:00:30,133 --> 00:00:31,500
+ani is fired, but paid:
 
 15
-00:00:41,695 --> 00:00:43,756
-decides who speaks for the coin.
+00:00:31,500 --> 00:00:33,800
+one-point-one-five million back.
 
 16
-00:00:45,660 --> 00:00:48,209
-No admin keys. Every step has a receipt,
+00:00:33,800 --> 00:00:35,100
+The rest burns.
 
 17
-00:00:48,209 --> 00:00:50,375
-and one command checks every rule.
+00:00:35,100 --> 00:00:36,833
+Supply shrinks.
 
 18
-00:00:52,380 --> 00:00:54,473
-CTO. The memecoin where anyone
+00:00:38,333 --> 00:00:40,767
+Now ani tries to post as the coin.
 
 19
-00:00:54,473 --> 00:00:56,497
-can take over. Built on NEAR.
+00:00:40,767 --> 00:00:42,067
+Her key was deleted
+
+20
+00:00:42,067 --> 00:00:44,133
+in the same transaction.
+
+21
+00:00:44,567 --> 00:00:45,867
+NEAR itself says no:
+
+22
+00:00:45,867 --> 00:00:47,933
+access key not found.
+
+23
+00:00:52,333 --> 00:00:53,833
+No admin keys.
+
+24
+00:00:53,833 --> 00:00:56,100
+The CEO's voice is a NEAR access key
+
+25
+00:00:56,100 --> 00:00:57,400
+on the coin itself,
+
+26
+00:00:57,400 --> 00:00:59,867
+and every step has a receipt.
+
+27
+00:01:01,600 --> 00:01:02,900
+C-T-O.
+
+28
+00:01:02,900 --> 00:01:05,200
+The memecoin where anyone can take over.
+
+29
+00:01:05,200 --> 00:01:06,500
+Testnet only.
+
+30
+00:01:06,500 --> 00:01:08,733
+There can only be one CEO.

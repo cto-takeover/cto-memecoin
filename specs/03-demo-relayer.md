@@ -44,9 +44,9 @@ The contract accepts only line numbers (spec 1). Demo buttons offer six (from `r
 
 ## Done when
 
-- [ ] budi takes the seat from ani via `/take-seat`; the explorer shows ani +1,150,000 (starting from a fresh 1,000,000 price) (sandbox: pass Nov 11, `npm run test:relayer`; testnet: after deploy, spec 6)
-- [ ] right after, `/announce` as ani with line 3 returns `AccessKeyNotFound` from NEAR, unedited (sandbox: pass, and equal field for field to the same call sent straight to the node; testnet: after deploy)
-- [ ] `/announce` as budi succeeds and the post appears in `get_announcements` (sandbox: pass; testnet: after deploy)
+- [x] budi takes the seat from ani via `/take-seat`; the explorer shows ani +1,150,000 (starting from a fresh 1,000,000 price) (sandbox: pass Nov 11, `npm run test:relayer`; testnet: Nov 12, the video run, tx `5zLmBZQUUXzNrbC1HmkhSzBUboXMWPHN68k5co2YGQCV`; https://testnet.near.rocks/tx/5zLmBZQUUXzNrbC1HmkhSzBUboXMWPHN68k5co2YGQCV shows budi → ani 1150000 CTOD and the 250000 burn)
+- [x] right after, `/announce` as ani with line 3 returns `AccessKeyNotFound` from NEAR, unedited (sandbox: pass, and equal field for field to the same call sent straight to the node; testnet: Nov 12, the video run at 2026-11-12T03:51:16.988Z, `InvalidTxError.InvalidAccessKeyError.AccessKeyNotFound`, see `video/txs.json`)
+- [x] `/announce` as budi succeeds and the post appears in `get_announcements` (sandbox: pass; testnet: Nov 12, tx `GPYdGMibjgUZ1ud81wD41qqg2y1rjCN9fF388NnxVw4a`, announcement index 10)
 - [x] any other contract, method, account or line is refused with HTTP 400 before anything is signed (14 cases in `web/test/relayer/relayer.test.ts`, sign counter stays 0)
 
 ## Build notes (added Nov 11 while implementing)

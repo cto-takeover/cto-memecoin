@@ -1,0 +1,251 @@
+{
+  "_note": "The bulletin script (docs/video-script.md) as data. `say` is the voiceover, word for word; `tts` is only how a word is fed to the voice (lowercase NEAR so it is not spelled out). `captions` are the on-screen chunks of the same words, at most 42 characters each. Version 4: 70 s, steady pacing, voice at 1.0x throughout.",
+  "fps": 30,
+  "duration": 70.0,
+  "ticker": "TESTNET ONLY · NOTHING FOR SALE · NO ADMIN KEYS · ALL FOOTAGE: LIVE APP ON demo-cto.testnet · TX HASHES IN THE REPO · THERE CAN ONLY BE ONE CEO · ",
+  "voice": {
+    "name": "af_heart",
+    "speed": 1.0,
+    "max_speed": 1.0,
+    "lang": "en-us",
+    "phonemes": {
+      "ani": "ˈɑni",
+      "budi": "bˈudi",
+      "memecoins": "mˈiːmkˌɔɪnz",
+      "memecoin": "mˈiːmkˌɔɪn",
+      "Testnet": "tˈɛstnˌɛt"
+    },
+    "max_pause": {
+      "2": 0.2
+    }
+  },
+  "scenes": [
+    {
+      "n": 1,
+      "start": 0.0,
+      "end": 4.0,
+      "kind": "card",
+      "card": "cold-open",
+      "title": "STOP PRESS",
+      "lines": [
+        {
+          "say": "Stop the presses.",
+          "captions": [
+            "Stop the presses."
+          ]
+        },
+        {
+          "say": "A memecoin just fired its CEO.",
+          "captions": [
+            "A memecoin just fired its CEO."
+          ]
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "start": 4.0,
+      "end": 11.0,
+      "kind": "card",
+      "card": "premise",
+      "title": "WHO RUNS YOUR MEMECOIN?",
+      "lines": [
+        {
+          "say": "Most memecoins: one dev holds the keys.",
+          "captions": [
+            "Most memecoins: one dev holds the keys."
+          ]
+        },
+        {
+          "say": "C-T-O has one CEO seat, and anyone can take it.",
+          "captions": [
+            "C-T-O has one CEO seat,",
+            "and anyone can take it."
+          ]
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "start": 11.0,
+      "end": 19.5,
+      "kind": "live",
+      "tab": "LIVE · TESTNET",
+      "headline": "LIVE FROM THE BOARDROOM",
+      "lines": [
+        {
+          "say": "Live from the boardroom.",
+          "captions": [
+            "Live from the boardroom."
+          ]
+        },
+        {
+          "say": "ani runs the coin's face and voice.",
+          "captions": [
+            "ani runs the coin's face and voice."
+          ]
+        },
+        {
+          "say": "Her seat costs one-point-four times what she paid.",
+          "captions": [
+            "Her seat costs one-point-four times",
+            "what she paid."
+          ]
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "start": 19.5,
+      "end": 28.0,
+      "kind": "live",
+      "tab": "LIVE · TESTNET",
+      "headline": "HOSTILE BID AT THE TAKEOVER DESK",
+      "lines": [
+        {
+          "say": "Enter budi.",
+          "captions": [
+            "Enter budi."
+          ]
+        },
+        {
+          "say": "A new face from fixed parts.",
+          "captions": [
+            "A new face from fixed parts."
+          ]
+        },
+        {
+          "say": "One-point-four million C-T-O.",
+          "captions": [
+            "One-point-four million C-T-O."
+          ]
+        },
+        {
+          "say": "Take the seat.",
+          "captions": [
+            "Take the seat."
+          ]
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "start": 28.0,
+      "end": 38.0,
+      "kind": "live",
+      "tab": "BREAKING",
+      "headline": "CEO FIRED, BUT PAID",
+      "lines": [
+        {
+          "say": "ani is fired, but paid: one-point-one-five million back.",
+          "captions": [
+            "ani is fired, but paid:",
+            "one-point-one-five million back."
+          ]
+        },
+        {
+          "say": "The rest burns.",
+          "captions": [
+            "The rest burns."
+          ]
+        },
+        {
+          "say": "Supply shrinks.",
+          "captions": [
+            "Supply shrinks."
+          ]
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "start": 38.0,
+      "end": 52.0,
+      "kind": "live",
+      "tab": "BREAKING",
+      "headline": "EX-CEO LOCKED OUT, BY NEAR ITSELF",
+      "lines": [
+        {
+          "say": "Now ani tries to post as the coin.",
+          "captions": [
+            "Now ani tries to post as the coin."
+          ]
+        },
+        {
+          "say": "Her key was deleted in the same transaction.",
+          "captions": [
+            "Her key was deleted",
+            "in the same transaction."
+          ]
+        },
+        {
+          "say": "NEAR itself says no: access key not found.",
+          "tts": "Near itself says no: access key not found.",
+          "captions": [
+            "NEAR itself says no:",
+            "access key not found."
+          ]
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "start": 52.0,
+      "end": 61.5,
+      "kind": "live",
+      "tab": "LIVE · TESTNET",
+      "headline": "THE EVIDENCE",
+      "lines": [
+        {
+          "say": "No admin keys.",
+          "captions": [
+            "No admin keys."
+          ]
+        },
+        {
+          "say": "The CEO's voice is a NEAR access key on the coin itself, and every step has a receipt.",
+          "tts": "The CEO's voice is a Near access key on the coin itself, and every step has a receipt.",
+          "captions": [
+            "The CEO's voice is a NEAR access key",
+            "on the coin itself,",
+            "and every step has a receipt."
+          ]
+        }
+      ]
+    },
+    {
+      "n": 8,
+      "start": 61.5,
+      "end": 70.0,
+      "kind": "card",
+      "card": "signoff",
+      "title": "SIGN-OFF",
+      "lines": [
+        {
+          "say": "C-T-O.",
+          "captions": [
+            "C-T-O."
+          ]
+        },
+        {
+          "say": "The memecoin where anyone can take over.",
+          "captions": [
+            "The memecoin where anyone can take over."
+          ]
+        },
+        {
+          "say": "Testnet only.",
+          "captions": [
+            "Testnet only."
+          ]
+        },
+        {
+          "say": "There can only be one CEO.",
+          "captions": [
+            "There can only be one CEO."
+          ]
+        }
+      ]
+    }
+  ]
+}
